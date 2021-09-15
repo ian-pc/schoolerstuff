@@ -8,5 +8,4 @@ public class QandA {
 		System.out.println("Q: Where do you live? A: Marr");
 		System.out.println("Q: What is your main language? A: C++");
 	}
-
 }
