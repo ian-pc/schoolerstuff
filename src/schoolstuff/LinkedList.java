@@ -16,7 +16,7 @@ public class LinkedList<E> {
 	
 	private Node first;
 	
-	public int size() {
+	public int size() { 
 		int size = 1;
 		Node currcount = first;
 		
@@ -35,17 +35,16 @@ public class LinkedList<E> {
 		return size;
 	}
 	
-	public void add(E info) {
-		
-		Node newNode = new Node(info);
-		
-		if (first == null) {
-			first = new Node(info);
-			return;
+	public E get(int index) {
+		Node curr = first;
+		try {
+		for (int i = 0; i < index; i++) {
+			curr = curr.next;
 		}
-		
-		Node curr = null;
-		curr.next = newNode;
+		return curr.data;
+		} catch (NullPointerException e) {
+			throw new IndexOutOfBoundsException();
+		}
 	}
 	
 	public void add(E info, int i) {
@@ -79,5 +78,47 @@ public class LinkedList<E> {
 		}
 		
 	}
+	
+	public void add(E info) {
+		
+		if (first == null) {
+			first = new Node(info);
+			return;
+		} else {
+			Node curr = first;
+			while (curr.next != null) {
+				curr = curr.next;
+			}
+			curr.next = new Node(info);
+		}
+	}
+	
+	public E remove(int index) {
+		
+		try {
+			Node curr = first;
+			for (int j = 0; j < index - 1; j++) { 
+				curr = curr.next;
+			}
+			
+			E temp = curr.next.data;
+			curr.next = curr.next.next;
+			return temp;
+		}
+		catch(NullPointerException e) {
+			
+			throw new IndexOutOfBoundsException();
+		}
+	}
+	
+	public static void main(String[] args) {
+		
+		
+		
+		//a.add(5, 1);
+		// TODO Auto-generated method stub
+		//System.out.println(a.size());
+	}
+
 	
 }
