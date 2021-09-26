@@ -26,6 +26,7 @@ public class question1 {
 			}
 			for (int i = 0; i < length; i++) {
 				System.out.println("x: " + x + " y: " + y);
+
 				a2[x][y] = a1[a1index];
 				x++;
 				a1index++;

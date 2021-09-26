@@ -42,6 +42,7 @@ public class LinkedList<E> {
 			curr = curr.next;
 		}
 		return curr.data;
+		
 		} catch (NullPointerException e) {
 			throw new IndexOutOfBoundsException();
 		}
@@ -95,6 +96,11 @@ public class LinkedList<E> {
 	
 	public E remove(int index) {
 		
+		if (index == 0) {
+			first = first.next;
+			
+		}
+		
 		try {
 			Node curr = first;
 			for (int j = 0; j < index - 1; j++) { 
@@ -113,11 +119,13 @@ public class LinkedList<E> {
 	
 	public static void main(String[] args) {
 		
+		LinkedList<Integer> test = new LinkedList();
+		test.add(3);
+		test.add(5);
+		test.add(8);
+		test.remove(0);
 		
-		
-		//a.add(5, 1);
-		// TODO Auto-generated method stub
-		//System.out.println(a.size());
+		System.out.println(test.get(0));
 	}
 
 	
