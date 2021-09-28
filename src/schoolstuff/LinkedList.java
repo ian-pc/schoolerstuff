@@ -26,7 +26,7 @@ public class LinkedList<E> {
 		
 		while (true) {
 			currcount = currcount.next;
-			if (currcount.next == null) {
+			if (currcount.next == null || currcount == null) {
 				break;
 			}
 			size++;
@@ -94,27 +94,29 @@ public class LinkedList<E> {
 		}
 	}
 	
-	public E remove(int index) {
-		
-		if (index == 0) {
-			first = first.next;
-			
+	public E remove(int i) {
+
+		Node curr = first;
+		if (i == 0) {
+			first = curr.next;
 		}
 		
 		try {
-			Node curr = first;
-			for (int j = 0; j < index - 1; j++) { 
+			for (int j = 0; j < i-1; j++) { 
 				curr = curr.next;
 			}
 			
 			E temp = curr.next.data;
+			
 			curr.next = curr.next.next;
+			
 			return temp;
 		}
 		catch(NullPointerException e) {
 			
 			throw new IndexOutOfBoundsException();
 		}
+		
 	}
 	
 	public static void main(String[] args) {
@@ -123,9 +125,13 @@ public class LinkedList<E> {
 		test.add(3);
 		test.add(5);
 		test.add(8);
-		test.remove(0);
-		
 		System.out.println(test.get(0));
+		System.out.println(test.get(1));
+		System.out.println(test.get(2));
+		
+		test.remove(0);
+		System.out.println(test.get(0));
+		System.out.println(test.get(1));
 	}
 
 	
