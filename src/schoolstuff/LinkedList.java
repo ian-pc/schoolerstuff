@@ -26,7 +26,7 @@ public class LinkedList<E> {
 		
 		while (true) {
 			currcount = currcount.next;
-			if (currcount.next == null || currcount == null) {
+			if (currcount == null || currcount.next == null) {
 				break;
 			}
 			size++;

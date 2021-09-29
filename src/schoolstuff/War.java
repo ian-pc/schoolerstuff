@@ -1,5 +1,6 @@
 package schoolstuff;
 
+import java.util.Collections;
 import java.util.Scanner;
 
 public class War<E> {
@@ -28,33 +29,53 @@ public class War<E> {
 		}
 		deck.add(new Card(13, 4));
 
-		
+		//good
 		
 		//shuffling
 		System.out.println("shuffling...");
-		for (int i = 0; i < deck.size(); i++) {
-			int j = (int) (Math.random()*deck.size());
-			Card temp = deck.get(i);
-			deck.remove(i);
-			deck.add(deck.get(j), i);
-			deck.remove(j);
-			deck.add(temp, j);
+		for (int i = 0; i < 25; i++) {
+			int index = (int) (Math.random()*deck.size());
+			deck.add(deck.get(index));
+			
+			deck.remove(index);
+			
+//			System.out.println(deck.size());
+//			for (int k = 0; k < deck.size(); k++) {
+//				System.out.print(deck.get(k).number + " ");
+//			}
+			
 		} 
 
 		System.out.println("done");
+		
+		//good
 		
 		//splitting deck
 		LinkedList<Card> deck1 = new LinkedList<Card>();
 		LinkedList<Card> deck2 = new LinkedList<Card>();
 		
-		for (int i = 0; i < 27; i++) {
+		for (int i = 0; i < deck.size()/2 + 1; i++) {
 			deck1.add(deck.get(i));
 		}
-		for (int i = 26; i < 53; i++) {
+		for (int i = deck.size()/2; i < deck.size() + 1; i++) {
 			deck2.add(deck.get(i));
 		}
 		
-		while (deck1.size() > 0 || deck2.size() > 0) {
+//		System.out.println(deck.size());
+//		for (int i = 0; i < deck.size(); i++) {
+//			System.out.print(deck.get(i).number + " ");
+//		}
+//		System.out.println();
+//		System.out.println(deck2.size());
+//		for (int i = 0; i < deck2.size(); i++) {
+//			System.out.print(deck2.get(i).number + " ");
+//		}
+//		System.out.println();
+		
+		
+		
+		//game
+		while (deck1.size() != 51 || deck2.size() != 51) {
 			
 			String cardsuit1;
 			String cardnum1;
@@ -62,7 +83,7 @@ public class War<E> {
 			if (deck1.get(0).suit == 0) {
 				cardsuit1 = "spades";
 			} else if (deck1.get(0).suit == 1) {
-				cardsuit1 = "heart";
+				cardsuit1 = "hearts";
 			} else if (deck1.get(0).suit == 2) {
 				cardsuit1 = "clubs";
 			}else {
@@ -87,7 +108,7 @@ public class War<E> {
 			if (deck2.get(0).suit == 0) {
 				cardsuit2 = "spades";
 			} else if (deck2.get(0).suit == 1) {
-				cardsuit2 = "heart";
+				cardsuit2 = "hearts";
 			} else if (deck2.get(0).suit == 2) {
 				cardsuit2 = "clubs";
 			}else {
@@ -114,6 +135,7 @@ public class War<E> {
 				if (deck1.size() == 0 || deck2.size() == 0) {
 					break;
 				}
+
 				deck1.remove(0);
 				deck2.remove(0);
 			} else if (deck2.get(0).number > deck1.get(0).number) {
@@ -123,18 +145,28 @@ public class War<E> {
 				if (deck1.size() == 0 || deck2.size() == 0) {
 					break;
 				}
+
 				deck1.remove(0);
 				deck2.remove(0);
 			} else if (deck1.get(0).number == deck2.get(0).number){
 				
 				System.out.println("draw");
-				
+//				System.out.println(deck1.size());
+//				for (int i = 0; i < deck1.size(); i++) {
+//					System.out.print(deck1.get(i).number + " ");
+//				}
+//				System.out.println(deck2.size());
+//				for (int i = 0; i < deck2.size(); i++) {
+//					System.out.print(deck2.get(i).number + " ");
+//				}
 				if (deck1.size() < 3) {
 					System.out.println("player 1 has too little cards and loses the draw");
+					System.out.println("player 1 wins!");
 					break;
 				}
 				if (deck2.size() < 3) {
 					System.out.println("player 2 has too little cards and loses the draw");
+					System.out.println("player 2 wins!");
 					break;
 				}
 				
@@ -142,7 +174,7 @@ public class War<E> {
 				if (deck1.get(1).suit == 0) {
 					cardsuit11 = "spades";
 				} else if (deck1.get(1).suit == 1) {
-					cardsuit11 = "heart";
+					cardsuit11 = "hearts";
 				} else if (deck1.get(1).suit == 2) {
 					cardsuit11 = "clubs";
 				}else {
@@ -151,7 +183,7 @@ public class War<E> {
 				if (deck1.get(2).suit == 0) {
 					cardsuit12 = "spades";
 				} else if (deck1.get(2).suit == 1) {
-					cardsuit12 = "heart";
+					cardsuit12 = "hearts";
 				} else if (deck1.get(2).suit == 2) {
 					cardsuit12 = "clubs";
 				}else {
@@ -161,7 +193,7 @@ public class War<E> {
 				if (deck2.get(1).suit == 0) {
 					cardsuit21 = "spades";
 				} else if (deck2.get(1).suit == 1) {
-					cardsuit21 = "heart";
+					cardsuit21 = "hearts";
 				} else if (deck2.get(1).suit == 2) {
 					cardsuit21 = "clubs";
 				}else {
@@ -171,7 +203,7 @@ public class War<E> {
 				if (deck2.get(2).suit == 0) {
 					cardsuit22 = "spades";
 				} else if (deck2.get(2).suit == 1) {
-					cardsuit22 = "heart";
+					cardsuit22 = "hearts";
 				} else if (deck2.get(2).suit == 2) {
 					cardsuit22 = "clubs";
 				}else {
@@ -270,12 +302,19 @@ public class War<E> {
 				}
 			} 
 
-			//System.out.println(deck1.size());
-			//System.out.println(deck2.size());
-			//String enter = sc.next();
-			//if (enter == "a") {
-			//	continue;
-			//}
+//			System.out.println(deck1.size());
+//			for (int i = 0; i < deck1.size(); i++) {
+//				System.out.print(deck1.get(i).number + " ");
+//			}
+//			System.out.println();
+//			System.out.println(deck2.size());
+//			for (int i = 0; i < deck2.size(); i++) {
+//				System.out.print(deck2.get(i).number + " ");
+//			}
+//			String enter = sc.next();
+//			if (enter == "a") {
+//				continue;
+//			}
 			
 		}
 		if (deck1.size() > deck2.size() && deck2.size() == 0) {
