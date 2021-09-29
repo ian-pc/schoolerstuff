@@ -14,20 +14,13 @@ public class Translator {
 	    Scanner br = new Scanner(new FileReader("EnglishToArabicDictionary.txt")); 
 	    
         while (br.hasNextLine()) {
-        	while (true) {
-            	String file = br.nextLine();
-            	System.out.println(file);
-                String file2 = br.nextLine();
-                System.out.println(file2);
 
-                EA.put(file, file2);
-                
-                if (br.nextLine() == null) {
-                	break;
-                }
-        	}
-            //String[] columns = br.nextLine().split("\n");
-            //System.out.println(columns[0]);
+        	String file = br.nextLine();
+        	System.out.println("key: " + file);
+            String file2 = br.nextLine();
+            System.out.println("value: " + file2);
+
+            EA.put(file, file2);
         }
 	}   
 	
