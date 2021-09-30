@@ -16,10 +16,7 @@ public class Translator {
         while (br.hasNextLine()) {
 
         	String file = br.nextLine();
-        	System.out.println("key: " + file);
             String file2 = br.nextLine();
-            System.out.println("value: " + file2);
-
             EA.put(file, file2);
         }
 	}   
@@ -29,8 +26,15 @@ public class Translator {
 		readFile();
 		Scanner sc = new Scanner(System.in);
 		
-		String word = sc.next();
-		System.out.println(EA.get(word));
+		while (true) {
+			String word = sc.next();
+			System.out.println(EA.get(word));
+			if (word == null) {
+				System.out.println("word is not in dictionary");
+			}
+			if (word != null || word == "quit") {
+				break;
+			}
+		}
 	}
-
 }
