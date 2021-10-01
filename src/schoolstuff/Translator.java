@@ -12,7 +12,7 @@ public class Translator {
 	public static void readFile() throws IOException {
 
 	    Scanner br = new Scanner(new FileReader("EnglishToArabicDictionary.txt")); 
-	    
+	    br.nextLine();
         while (br.hasNextLine()) {
 
         	String file = br.nextLine();
@@ -27,12 +27,12 @@ public class Translator {
 		Scanner sc = new Scanner(System.in);
 		
 		while (true) {
-			String word = sc.next();
+			String word = sc.next().toLowerCase();
 			System.out.println(EA.get(word));
-			if (word == null) {
+			if (word.equals(null)) {
 				System.out.println("word is not in dictionary");
 			}
-			if (word != null || word == "quit") {
+			if (word.equals(null) || word.equals("quit")) {
 				break;
 			}
 		}

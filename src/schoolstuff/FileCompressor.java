@@ -29,7 +29,12 @@ public class FileCompressor  {
 		// TODO Auto-generated method stub
 		readFile();
 		
-		System.out.println(hm.get('l'));
+		PriorityQueue<Integer> pqueue = new PriorityQueue<Integer>();
+		for (int i = 0; i < hm.size(); i++) {
+			
+		}
+		
+		System.out.println(hm.get('o'));
 	}
 
 }
