@@ -22,6 +22,10 @@ public class PriorityQueue<E> {
 	
 	private ArrayList<Node> pqueue = new ArrayList<Node>();
 	
+	public int getFirstPrior() {
+		return pqueue.get(0).getprior();
+	}
+	
 	public int get(E value) { //gets the value and return's it's priority
 		int location = 0;
 		while (true) {
@@ -35,10 +39,10 @@ public class PriorityQueue<E> {
 	}
 	
 	public String toString() {
-		String string = null;
+		String string = "";
 		
-		for (int i = 0; i < pqueue.size(); i++) {
-			string += (String) pqueue.get(i).value + " " + String.valueOf(pqueue.get(i).priority) + " ";
+		for (Node n: pqueue) {
+			string += "(" + n.value.toString() + ", " + n.priority + ")";
 		}
 		
 		return string;
@@ -80,7 +84,15 @@ public class PriorityQueue<E> {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
+//		PriorityQueue<Integer> a = new PriorityQueue<>();
+//		a.add(1, 0);
+//		a.add(2, 0);
+//		System.out.println(a.toString());
+//		a.pop();
+//		System.out.println(a.toString());
+//		a.pop();
+//		System.out.println(a.toString());
+//		a.pop();
 	}
 
 }
