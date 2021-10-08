@@ -60,10 +60,9 @@ public class FileCompressor  {
 			pqueue.add(new Branch<Character>(A, B), a + b);
 		}
 		
-		
-		
 		//System.out.println(tree.right.right.left.info);
 		//System.out.println(file);
+		
 		genCode("", pqueue.pop());
 		
 		System.out.println(letters);
