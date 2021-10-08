@@ -12,6 +12,7 @@ public class FileCompressor  {
 	static HashMap<Character, String> letters = new HashMap<Character, String>();
 	
 	public static String file = "";
+	public static String preBBW = "";
 	
 	public static void readFile() throws IOException {
 		
@@ -65,8 +66,22 @@ public class FileCompressor  {
 		
 		genCode("", pqueue.pop());
 		
-		System.out.println(letters);
+		//System.out.println(letters);
+		for (int i = 0; i < file.length(); i++) {
+			preBBW += letters.get(file.charAt(i));
+		}
 		
+		//System.out.println(postBBW);
+		BufferedBitWriter BBW = new BufferedBitWriter("BBWout.txt");
+		for (int i = 0; i < file.length(); i++) {
+			if (preBBW.charAt(i) == '0') {
+				BBW.writeBit(false);
+			} else if (preBBW.charAt(i) == '1') {
+				BBW.writeBit(true);
+			}
+		}
+		
+		BBW.close();
 		
 	}
 
