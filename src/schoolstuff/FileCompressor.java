@@ -1,6 +1,9 @@
 package schoolstuff;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,6 +83,17 @@ public class FileCompressor  {
 				BBW.writeBit(true);
 			}
 		}
+		
+		BufferedWriter BW = new BufferedWriter(new FileWriter(new File("TreeFileCompressSample.txt")));
+		
+		for (Character key : letters.keySet()) {
+			BW.write(key);
+			BW.newLine();
+			BW.write(letters.get(key));
+			BW.newLine();
+		}
+		BW.close();
+		
 		
 		BBW.close();
 		
