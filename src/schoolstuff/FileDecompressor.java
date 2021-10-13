@@ -21,7 +21,16 @@ public class FileDecompressor {
 	    BufferedBitReader BBR = new BufferedBitReader("BBWout.txt");
 	    
         while (br.hasNextLine()) {
-        	char file = br.nextLine().charAt(0);
+        	String filetemp = br.nextLine();
+        	//System.out.println(filetemp);
+        	char file;
+        	if (filetemp.isEmpty()) {
+        		file = '\n';
+        		br.nextLine();
+        	} else {
+        		file = filetemp.charAt(0);
+        	}
+        	//System.out.println(file);
             String file2 = br.nextLine();
             letters.put(file2, file);
         }
@@ -40,7 +49,6 @@ public class FileDecompressor {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		readFile();
-		
 		String letterCode = "";
 		//System.out.println(postBBR);
 		while(postBBR.length() != 0) {
@@ -60,7 +68,7 @@ public class FileDecompressor {
 			//System.out.println(postBBR);
 			letterCode = "";
 			//System.out.println(text);
-			System.out.println(postBBR);
+			//System.out.println(postBBR);
 		}
 		System.out.println("ended");
 		System.out.println(text);
