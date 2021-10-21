@@ -38,6 +38,10 @@ public class PriorityQueue<E> {
 		return pqueue.get(location).priority;
 	}
 	
+	public E getFirst() {
+		return pqueue.get(0).value;
+	}
+	
 	public String toString() {
 		String string = "";
 		

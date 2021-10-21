@@ -11,67 +11,75 @@ import java.util.Scanner;
 
 public class FileDecompressor {
 	
+	//HashMap with the key being a binary string and the value being the char it corresponds to. 
 	static HashMap<String, Character> letters = new HashMap<>();
-	static String postBBR = "";
+	
+	//the text to be printed
 	static String text = "";
 	
+	static Scanner br;
+	static BufferedBitReader BBR;
+
+	static FileWriter BW;
+    //reads the file containing the characters and their corresponding string of Binary and sorts it into a HashMap
 	public static void readFile() throws IOException {
 		
-	    Scanner br = new Scanner(new FileReader("TreeFileCompressSample.txt")); 
-	    BufferedBitReader BBR = new BufferedBitReader("BBWout.txt");
+	    br = new Scanner(new FileReader("TreeFileCompressSample.txt")); 
 	    
         while (br.hasNextLine()) {
         	String filetemp = br.nextLine();
-        	//System.out.println(filetemp);
         	char file;
+        	//line breaks are worth two lines on windows, so make sure to skip a line if it detect this and skip a line
         	if (filetemp.isEmpty()) {
         		file = '\n';
         		br.nextLine();
         	} else {
         		file = filetemp.charAt(0);
         	}
-        	//System.out.println(file);
             String file2 = br.nextLine();
             letters.put(file2, file);
         }
-        //System.out.println(letters);
+	}  
+	
+	//converts the HashMap and the BufferedBit file to the original file
+	public static void translate() throws IOException {
+
+		BW = new FileWriter(new File("FileDecompressSample.txt"));
+	    BBR = new BufferedBitReader("BBWout.txt");
+
+		String postBBR = "";
+		
      	while (BBR.hasNext()) {
+     		//reads the binary and adds it to a string
      		Boolean a = BBR.readBit();
-            //System.out.println(a);
      		if (a == false) {
      			postBBR += '0';
      		} else {
      			postBBR += '1';
      		}
-     	}
-	}  
+     		
+			//System.out.println(BBR.hasNext());
+			if (BBR.hasNext() == false) {
+				System.out.println();
+			}
+     		//if a string is not translatable from the binary, a new binary character is added until one can be translate
+     		if (letters.get(postBBR) == null) {
+				continue;
+			}
+
+			BW.write(letters.get(postBBR).toString());
+			postBBR = "";
+			
+     		
+     	} 
+		BW.close();
+	}
+	
 	
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		readFile();
-		String letterCode = "";
-		//System.out.println(postBBR);
-		while(postBBR.length() != 0) {
-			int k = 0;
-			
-			if (letters.get(letterCode) == null) {
-				//System.out.println(postBBR.charAt(k));
-				letterCode += postBBR.charAt(k);
-				k++; 
-				postBBR = postBBR.substring(k, postBBR.length());
-				//System.out.println(postBBR);
-				continue;
-			}
-			//System.out.println(letterCode);
-			text += letters.get(letterCode);
-			//System.out.println(letters.get(letterCode));
-			//System.out.println(postBBR);
-			letterCode = "";
-			//System.out.println(text);
-			//System.out.println(postBBR);
-		}
-		System.out.println("ended");
-		System.out.println(text);
+		translate();
 	}
 
 }
