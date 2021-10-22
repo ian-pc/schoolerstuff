@@ -31,7 +31,7 @@ public class FileDecompressor {
         	char file;
         	//line breaks are worth two lines on windows, so make sure to skip a line if it detect this and skip a line
         	if (filetemp.isEmpty()) {
-        		file = '\n';
+        		file = '\r';
         		br.nextLine();
         	} else {
         		file = filetemp.charAt(0);
@@ -58,19 +58,16 @@ public class FileDecompressor {
      			postBBR += '1';
      		}
      		
-			//System.out.println(BBR.hasNext());
-			if (BBR.hasNext() == false) {
-				System.out.println();
-			}
      		//if a string is not translatable from the binary, a new binary character is added until one can be translate
      		if (letters.get(postBBR) == null) {
 				continue;
 			}
 
-			BW.write(letters.get(postBBR).toString());
-			postBBR = "";
+     		//writes the string's character value
+			BW.write(letters.get(postBBR));
 			
-     		
+			//clear's the string
+			postBBR = "";
      	} 
 		BW.close();
 	}

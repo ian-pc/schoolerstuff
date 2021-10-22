@@ -19,6 +19,7 @@ public class FileCompressor {
 	static PriorityQueue<Branch<Character>> pqueue = new PriorityQueue<>();
 	// Length of the file
 	public static int fileLength = 0;
+
 	
 	// Function that reads the text file that is to be compressed
 	public static void readFile() throws IOException {
@@ -37,24 +38,6 @@ public class FileCompressor {
 			}
 			fileLength++;
 		}
-	}
-
-	// Finds the location of the character at the location
-	public static char findChar(int loc) throws IOException{
-		
-        File file = new File("FileCompressSample.txt");
-        char out = 0;
-        
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			for (int i = 0; i < loc - 1; i++) {
-				br.read();
-			}
-			out = (char) br.read();
-			//System.out.println(out);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return out;
 	}
 	
 	// sets up the priority queue that will be used later
@@ -103,12 +86,16 @@ public class FileCompressor {
 	// writes all the characters in the buffered bit writer form after turned into binary
 	public static void writeBBR() throws IOException {
 		
+		char tempchar;
+
+	    BufferedReader br = new BufferedReader(new FileReader(new File("FileCompressSample.txt")));
+	    		
 		// Converts the original document to a string of 0's and 1's from the hashMap "letters"
 		BufferedBitWriter BBW = new BufferedBitWriter("BBWout.txt");
 		
 		for (int i = 0; i < fileLength; i++) {
 			//preBBW += letters.get(file.charAt(i));
-			String tChar = letters.get(findChar(i));
+			String tChar = letters.get((char)br.read());
 			
 			// Converts the preBBW (the binary code) to Buffered Bit Writer code
 			for (int j = 0; j < tChar.length(); j++) {
@@ -127,15 +114,10 @@ public class FileCompressor {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		readFile();
-		System.out.println("read file");
 		setupPqueue();
-		System.out.println("setup pqueue");
 		genCode("", pqueue.pop());
-		System.out.println("generated queue");
 		writeTree();
-		System.out.println("wrote tree");
 		writeBBR();
-		System.out.println("done");
 	}
 
 }
