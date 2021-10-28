@@ -42,7 +42,7 @@ public class question2 {
 		String[] contarr = Arrays.toString(a).substring(1, Arrays.toString(a).length() - 1).split("false, ");
 		contarr[contarr.length - 1] = contarr[contarr.length - 1].replace("false", "");
 		Arrays.sort(contarr);
-		return (int) Math.ceil((double) (contarr[contarr.length - 1].length()/6)/2);
+		return (int) ((double) (contarr[contarr.length - 1].length()/6)/2);
 	}
 	
 	public static void main(String[] args) {
