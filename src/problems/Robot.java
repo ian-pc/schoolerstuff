@@ -101,8 +101,9 @@ public int robotX = Height/2 - 50, robotY = Width/2;
 		canvas.setPreferredSize(new Dimension(Width, Height));
 		frame.add(canvas);
 		frame.setVisible(true);
-		canvas.requestFocus();
 		while(true) {
+
+			canvas.requestFocus();
 			frame.getContentPane().repaint();
 		}
 
