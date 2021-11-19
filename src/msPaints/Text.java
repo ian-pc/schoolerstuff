@@ -29,7 +29,7 @@ public class Text extends Shape {
 	@Override
 	public Shape copy() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Text(this.text, this.x1, this.y1, this.color, this.textSize);
 	}
 
 	@Override
