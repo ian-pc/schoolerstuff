@@ -69,14 +69,16 @@ public class msPaint {
 	public final int Height = 600;
 	public final int Width = 600;
 	public JFrame frame;
-	public JButton rectangle, circle, line, text, chooseColor, delete, move, front, back, pen, save, undo;
+	public JButton rectangle, circle, line, text, chooseColor, delete, move, front, back, pen, save, undo, clear;
 	public JTextField lineWidthField, textSizeField, textContentField;
 	public Color tempColor = new Color(0, 0, 0);
 	public JLabel lineWidthLabel, textSizeLabel, textContentLabel;
 	public boolean drawing = false;
 	public boolean holding = false;
-	public int MDX, MDY;
-
+	public int MDX = 0, MDY = 0;
+	public int movingIndex;
+	public boolean moving = false;
+	
 	public int x1Temp, x2Temp, y1Temp, y2Temp;
 
 	public ArrayList<Shape> shapes = new ArrayList<>();
@@ -91,9 +93,6 @@ public class msPaint {
 		textContentField = new JTextField();
 		textContentField.setEditable(true);
 
-		lineWidthField.setPreferredSize(new Dimension(100, 50));
-		textSizeField.setPreferredSize(new Dimension(100, 50));
-		textContentField.setPreferredSize(new Dimension(100, 50));
 
 		lineWidthLabel = new JLabel("Line width: ");
 		textContentLabel = new JLabel("Text content: ");
@@ -112,6 +111,7 @@ public class msPaint {
 		undo = new JButton("undo");
 		line = new JButton("line");
 		text = new JButton("text");
+		clear = new JButton("clear");
 
 
 		frame.setSize(Width, Height);
@@ -166,10 +166,15 @@ public class msPaint {
 		buttons3.add(pen);
 		buttons3.add(save);
 		buttons3.add(undo);
+		buttons3.add(clear);
 
 		buttons1.setPreferredSize(new Dimension(Width, 50));
 		buttons2.setPreferredSize(new Dimension(Width, 50));
 		buttons3.setPreferredSize(new Dimension(Width, 50));
+
+		lineWidthField.setMaximumSize(new Dimension(100, 50));
+		textSizeField.setMaximumSize(new Dimension(100, 50));
+		textContentField.setMaximumSize(new Dimension(100, 50));
 
 		mainContainer.add(buttons1);
 		mainContainer.add(buttons2);
@@ -214,10 +219,11 @@ public class msPaint {
 					
 				} else if (drawingTopic == "front") {
 					
-					for (int i = 0; i < shapes.size(); i++) {
+					for (int i = shapes.size(); i < 0; i--) {
 						if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
 							shapes.add(shapes.get(i));
 							shapes.remove(i);
+							break;	
 						}
 					}
 					frame.getContentPane().repaint();
@@ -237,6 +243,7 @@ public class msPaint {
 						if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
 							shapes.add(0, shapes.get(i));
 							shapes.remove(i + 1);
+							break;
 						}
 					}
 					frame.getContentPane().repaint();
@@ -287,10 +294,14 @@ public class msPaint {
 						y1Temp = e.getPoint().y;
 						for (int i = 0; i < shapes.size(); i++) {
 							if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
-								MDX = e.getX() - shapes.get(i).x1;
-								MDY = e.getY() - shapes.get(i).y1; 
+								moving = true;
+								movingIndex = i;
+								break;
 							}
 						}
+
+						MDX = e.getX() - shapes.get(movingIndex).x1;
+						MDY = e.getY() - shapes.get(movingIndex).y1; 
 						drawing = true;
 
 					} 
@@ -354,6 +365,8 @@ public class msPaint {
 					}
 				} else if (drawingTopic == "move") {
 					
+					moving = false;
+					
 					if (archive.size() == 15) {
 						archive.remove(0);
 					}
@@ -408,10 +421,10 @@ public class msPaint {
 					shapes.get(shapes.size() - 1).resize(e.getPoint().x, e.getPoint().y, 0, 0);
 				} else if (drawingTopic == "move") {
 					//shapes.get(shapes.size() - 1).move(x1Temp, y1Temp, e.getPoint().x, e.getPoint().y);
-					for (int i = 0; i < shapes.size(); i++) {
-						if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
-							shapes.get(i).move(MDX, MDY, e.getPoint().x, e.getPoint().y);
-						}
+					if (moving == true) {
+						shapes.get(movingIndex).move(MDX, MDY, e.getPoint().x, e.getPoint().y);
+						MDX = e.getX() - shapes.get(movingIndex).x1;
+						MDY = e.getY() - shapes.get(movingIndex).y1; 
 					}
 				
 				}
@@ -536,15 +549,30 @@ public class msPaint {
 
 		undo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				//System.out.println(archive);
 				if (archive.size() > 1) {
 					shapes = archive.get(archive.size() - 2);
 					archive.remove(archive.size() - 1);
-				} else if (archive.size() == 1) {
+				} else if (archive.size() == 1 && archive.get(0).size() == 1) {
 					shapes = new ArrayList<>();
 					archive.remove(0);
 				}
 				
+				frame.getContentPane().repaint();
+			}
+		});
+		
+		clear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				shapes.clear();
+				if (archive.size() == 15) {
+					archive.remove(0);
+				}
+				ArrayList<Shape> tempShapes = new ArrayList<>();
+				for (int i = 0; i < shapes.size(); i++) {
+					tempShapes.add(shapes.get(i).copy());
+				}
+				archive.add(tempShapes);
 				frame.getContentPane().repaint();
 			}
 		});

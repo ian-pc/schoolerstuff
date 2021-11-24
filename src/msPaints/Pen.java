@@ -17,7 +17,6 @@ public class Pen extends Shape {
 			}
 		}
 		
-		public ArrayList<Pixel> pen;
 		
 		public Pen(Color c, int lineWidth, ArrayList<Pixel> pen) {
 			super(c, lineWidth, pen);
@@ -25,6 +24,7 @@ public class Pen extends Shape {
 			this.color = c;
 			this.lineWidth = lineWidth;
 			this.pen = pen;
+			this.distFrom0 = new ArrayList<>();
 		}
 		
 
@@ -47,6 +47,9 @@ public class Pen extends Shape {
 		        if (pen.size() > 1) {
 		        	g2.draw(new Line2D.Float(pen.get(i).x, pen.get(i).y, pen.get(i - 1).x, pen.get(i - 1).y));
 		        }
+
+				this.x1 = pen.get(0).x;
+				this.y1 = pen.get(0).y;
 		    }
 		}
  
@@ -54,34 +57,67 @@ public class Pen extends Shape {
 		public boolean isOn(int x, int y) {
 			// TODO Auto-generated method stub
 			for (int i = 1; i < pen.size(); i++) {
-				if (x > pen.get(i).x && x < pen.get(i).x + 4) {
-					if (y > pen.get(i).y && y < pen.get(i).y + 4) {
-						return true;
-					}
-				}
-				int tempx1, tempx2;
-				if (pen.get(i).x < pen.get(i - 1).x) {
-					tempx1 = pen.get(i).x;
-					tempx2 = pen.get(i - 1).x;
-				} else {
-					tempx1 = pen.get(i - 1).x;
-					tempx2 = pen.get(i).x;
-				} 
-				double m = ((double)(pen.get(i - 1).y) - pen.get(i).y)/(double)(pen.get(i - 1).x - pen.get(i).x);
+				double theta = Math.atan2((pen.get(i - 1).y - pen.get(i).y), (pen.get(i - 1).x - pen.get(i).x));
+				double o = Math.sin(theta)*(this.lineWidth/2);
+				double n = Math.cos(theta)*(this.lineWidth/2);
+				
+				double tempx1, tempx2, tempy1, tempy2;
+
+				tempx1 = pen.get(i).x - n;
+				tempx2 = pen.get(i - 1).x + n;
+				tempy1 = pen.get(i).y - o;
+				tempy2 = pen.get(i - 1).y + o;
+				
+				double m = ((double)(pen.get(i - 1).y - pen.get(i).y)/(double)(pen.get(i - 1).x - pen.get(i).x));
 				double b = (pen.get(i).y - m * pen.get(i).x);
-				//System.out.println(tempx1 + " " + tempx2);
-				if (x > tempx1 && x < tempx2 ) {
-//					System.out.println(tempx2 - tempx1);
-					if (Math.abs(m*x + b - y) < this.lineWidth * 0.5) {
-						return true;
-					}
-				} else if ((tempx2 - tempx1) < this.lineWidth ){
-					if (x > this.x1 - this.lineWidth && x < this.x1 + this.lineWidth) {
-						if ((y > this.y2 && y < this.y1) || (y < this.y2 && y > this.y1)) {
+				double pm = -1/m;
+				double pb1 = tempy1 - pm * tempx1;
+				double pb2 = tempy2 - pm * tempx2;
+				if (pb2 < pb1) {
+					double temp = pb2;
+					pb2 = pb1;
+					pb1 = temp;
+				}
+				double dist = Math.abs(Math.sin(90)*((this.lineWidth)/Math.sin(90 - theta)));
+				double b1 = b - dist;
+				double b2 = b + dist;
+
+				int boundx1, boundx2;
+				if (pen.get(i).x < pen.get(i - 1).x) {
+					boundx1 = pen.get(i).x;
+					boundx2 = pen.get(i - 1).x;
+				} else {
+					boundx1 = pen.get(i - 1).x;
+					boundx2 = pen.get(i).x;
+				}
+				int boundy1, boundy2;
+				if (pen.get(i).y < pen.get(i - 1).y) {
+					boundy1 = pen.get(i).y;
+					boundy2 = pen.get(i - 1).y;
+				} else {
+					boundy1 = pen.get(i - 1).y;
+					boundy2 = pen.get(i).y;
+				}
+				if (boundx2 - boundx1 < this.lineWidth * 2) {
+					if (x > boundx1 - this.lineWidth/2 && x < boundx2 + this.lineWidth/2) {
+						if (y > boundy1 - this.lineWidth/2 && y < boundy2 + this.lineWidth/2) {
 							return true;
 						}
 					}
-					
+				} else if (boundy2 - boundy1 < this.lineWidth * 2) {
+					if (y > boundy1 - this.lineWidth/2 && y < boundy2 + this.lineWidth/2) {
+						if (x > boundx1 - this.lineWidth/2 && x < boundx2 + this.lineWidth/2) {
+							return true;
+						}
+					}
+				} else {
+					if (y > pm*x + pb1 && y < pm*x + pb2) {
+//					System.out.println("ye");
+						if (y > m*x + b1 && y < m*x + b2) {
+			//				System.out.println("ye2");
+							return true;
+						}
+					}
 				}
 			}
 			
@@ -93,6 +129,7 @@ public class Pen extends Shape {
 		public void resize(int x1, int y1, int x2, int y2) {
 			// TODO Auto-generated method stub
 			pen.add(new Pixel(x1, y1));
+			distFrom0.add(new Pixel(pen.get(0).x - x1, pen.get(0).y - y1));
 		}
 
 		

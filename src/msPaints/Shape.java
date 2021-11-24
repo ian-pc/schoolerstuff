@@ -14,7 +14,7 @@ public abstract class Shape {
 	protected int textSize;
 	protected int lineWidth;
 	protected ArrayList<Pixel> pen;
-
+	protected ArrayList<Pixel> distFrom0;
 	public Shape(int x1, int y1, int x2, int y2, Color c) {
 		this.x1 = x1;
 		this.y1 = y1;
@@ -54,9 +54,12 @@ public abstract class Shape {
 		this.y1 = y1 - y_r;
 		this.x2 = this.x1 + width;
 		this.y2 = this.y1 + height;
-		for (int i = 1; i < pen.size(); i++) {
-			pen.get(i).x = x1 - x_r +  (pen.get(0).x + pen.get(i).x);
-			pen.get(i).y = y1 - y_r +  (pen.get(0).y + pen.get(i).y);	
+		
+		if (this.pen != null) {
+			for (int i = 0; i < pen.size(); i++) {
+				pen.get(i).x = -distFrom0.get(i).x + x1 - x_r; 
+				pen.get(i).y = -distFrom0.get(i).y + y1 - y_r;
+			}
 		}
 	}
 

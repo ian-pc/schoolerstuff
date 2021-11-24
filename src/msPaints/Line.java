@@ -37,56 +37,80 @@ public class Line extends Shape {
 	@Override
 	public boolean isOn(int x, int y) {
 		// TODO Auto-generated method stub
-		int tempx1, tempx2;
-		if (this.x1 < this.x2) {
-			tempx1 = this.x1;
-			tempx2 = this.x2;
-		} else {
-			tempx1 = this.x2;
-			tempx2 = this.x1;
-		}
+
 		
-//		System.out.println(tempx1);
-//		System.out.println(tempx2);
-//		System.out.println(tempy1);
-//		System.out.println(tempy2);
+		double theta = Math.atan2((this.y2 - this.y1), (this.x2 - this.x1));
+		double o = Math.sin(theta)*(this.lineWidth/2);
+		double n = Math.cos(theta)*(this.lineWidth/2);
+		
+		double tempx1, tempx2, tempy1, tempy2;
+
+		tempx1 = this.x1 - n;
+		tempx2 = this.x2 + n;
+		tempy1 = this.y1 - o;
+		tempy2 = this.y2 + o;
 		
 		double m = ((double)(this.y2 - this.y1)/(double)(this.x2 - this.x1));
 		double b = (this.y1 - m * this.x1);
+		double pm = -1/m;
+		double pb1 = tempy1 - pm * tempx1;
+		double pb2 = tempy2 - pm * tempx2;
+		if (pb2 < pb1) {
+			double temp = pb2;
+			pb2 = pb1;
+			pb1 = temp;
+		}
+		double dist = Math.abs(Math.sin(90)*((this.lineWidth)/Math.sin(90 - theta)));
+		double b1 = b - dist;
+		double b2 = b + dist;
+
 		
-//		double pm = -1 * 1/m;
-//		double pb1 = (tempy1 - pm * tempx1);
-//		double pb2 = (tempy2 - pm * tempx2);
-//		
-//
-//		if (y < m*x + b1 && y > m*x + b2) {
-//			System.out.println("ye");
-//			//System.out.println(m);
-//			//System.out.println(y);
-//			if (y < pm*x + pb1 && y > pm*x + pb2) {
-//				System.out.println("ye2");
-//				return true;
-//			}
-//		}
-		
-		//System.out.println(tempx1 + " " + tempx2);
-		
-		if (x > tempx1 && x < tempx2 ) {
-//			System.out.println(tempx2 - tempx1);
-			if (Math.abs(m*x + b - y) < this.lineWidth * 0.5) {
-				return true;
-			}
-		} else if ((tempx2 - tempx1) < this.lineWidth ){
-			if (x > this.x1 - this.lineWidth && x < this.x1 + this.lineWidth) {
-				if ((y > this.y2 && y < this.y1) || (y < this.y2 && y > this.y1)) {
+//		System.out.println("m " + m);
+//		System.out.println("b1 " + b1);
+//		System.out.println("b2 " + b2);
+//		System.out.println("pm " + pm);
+//		System.out.println("pb1 " + pb1);
+//		System.out.println("pb2 " + pb2);
+//		System.out.println("dist " + dist);
+//		System.out.println();
+
+		int boundx1, boundx2;
+		if (this.x1 < this.x2) {
+			boundx1 = this.x1;
+			boundx2 = this.x2;
+		} else {
+			boundx1 = this.x2;
+			boundx2 = this.x1;
+		}
+		int boundy1, boundy2;
+		if (this.y1 < this.y2) {
+			boundy1 = this.y1;
+			boundy2 = this.y2;
+		} else {
+			boundy1 = this.y2;
+			boundy2 = this.y1;
+		}
+		if (boundx2 - boundx1 < this.lineWidth * 2) {
+			if (x > boundx1 - this.lineWidth/2 && x < boundx2 + this.lineWidth/2) {
+				if (y > boundy1 - this.lineWidth/2 && y < boundy2 + this.lineWidth/2) {
 					return true;
 				}
 			}
-			
+		} else if (boundy2 - boundy1 < this.lineWidth * 2) {
+			if (y > boundy1 - this.lineWidth/2 && y < boundy2 + this.lineWidth/2) {
+				if (x > boundx1 - this.lineWidth/2 && x < boundx2 + this.lineWidth/2) {
+					return true;
+				}
+			}
+		} else {
+			if (y > pm*x + pb1 && y < pm*x + pb2) {
+//			System.out.println("ye");
+				if (y > m*x + b1 && y < m*x + b2) {
+	//				System.out.println("ye2");
+					return true;
+				}
+			}
 		}
-		
-		
-		
 		
 		return false;
 	}
