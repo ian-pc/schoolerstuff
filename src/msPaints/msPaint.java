@@ -6,85 +6,94 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import msPaints.Pen.Pixel;
 
-
-
 public class msPaint {
 	
-	class ShapePast {
-		String shape = "";
-		int x1, y1, x2, y2;
-		Color color;
-		int fontSize;
-		int lineWidth;
-
-		public ShapePast(String shape, int x1, int y1, int x2, int y2, Color color) {
-			this.shape = shape;
-			this.x1 = x1;
-			this.y1 = y1;
-			this.x2 = x2;
-			this.y2 = y2;
-			this.color = color;
-
-			if (shape == "rectangle" || shape == "circle") {
-				if (x1 > x2) {
-					this.x1 = this.x2;
-					this.x2 = x1;
-				}
-				if (y1 > y2) {
-					this.y1 = this.y2;
-					this.y2 = y1;
-				}
-			}
-
-		}
-
-		public ShapePast(String shape, int x1, int y1, Color color, int fontSize) {
-			this.shape = shape;
-			this.x1 = x1;
-			this.y1 = y1;
-			this.color = color;
-			this.fontSize = fontSize;
-		}
-	}
-
-	public String textContent = "";
-	public int lineWidth = 1;
-	public int textSize = 1;
-	public String drawingTopic = "rectangle";
-	public final int Height = 600;
-	public final int Width = 600;
-	public JFrame frame;
-	public JButton rectangle, circle, line, text, chooseColor, delete, move, front, back, pen, save, undo, clear;
-	public JTextField lineWidthField, textSizeField, textContentField;
-	public Color tempColor = new Color(0, 0, 0);
-	public JLabel lineWidthLabel, textSizeLabel, textContentLabel;
-	public boolean drawing = false;
-	public boolean holding = false;
-	public int MDX = 0, MDY = 0;
-	public int movingIndex;
-	public boolean moving = false;
+	//elements
+	private final int Height = 600, Width = 600;
+	private JFrame frame;
+	private JButton rectangle, circle, line, text, chooseColor, delete, move, front, back, pen, export, undo, clear, save, load;
+	private JTextField lineWidthField, textSizeField, textContentField;
+	private JLabel lineWidthLabel, textSizeLabel, textContentLabel;
 	
-	public int x1Temp, x2Temp, y1Temp, y2Temp;
+	//temporary Color
+	private Color tempColor = new Color(0, 0, 0);
+	
+	//width of the line
+	private int lineWidth = 1;
+	
+	//what is the user drawing?
+	private String drawingTopic = "rectangle";
+	
+	//is the user drawing?
+	private boolean drawing = false;
+	
+	
+	//mouse displacement proportional to the shape (for move function)
+	private int MDX = 0, MDY = 0;
+	
+	//the index of the part of the pen that is being moved. 
+	private int movingIndex;
+	
+	//is the shape moving?
+	private boolean moving = false;
+	
+	//is the picture saved?
+	private boolean saved = false;
+	
+	//the file location of the current file
+	private String curFile = null;
+	
+	//temporary location of the first mouse position
+	private int xTemp, yTemp;
+	
+	//ArrayList of shapes
+	private ArrayList<Shape> shapes = new ArrayList<>();
+	
+	//ArrayLists of previous iterations of shape (for undo)
+	private ArrayList<ArrayList<Shape>> archive = new ArrayList<>();
 
-	public ArrayList<Shape> shapes = new ArrayList<>();
-	public ArrayList<ArrayList<Shape>> archive = new ArrayList<>();
-
+	//adds shapes to archive (for undo)
+	private void addToArchive() {
+		
+		//can only undo 15 times
+		if (archive.size() == 15) {
+			archive.remove(0);
+		}
+		ArrayList<Shape> tempShapes = new ArrayList<>();
+		for (int i = 0; i < shapes.size(); i++) {
+			tempShapes.add(shapes.get(i).copy());
+		}
+		archive.add(tempShapes);
+	} 
+	
 	public msPaint() {
+		
+		//adding all the graphic elements
 		frame = new JFrame();
 		lineWidthField = new JTextField();
 		lineWidthField.setEditable(true);
@@ -93,11 +102,10 @@ public class msPaint {
 		textContentField = new JTextField();
 		textContentField.setEditable(true);
 
+		lineWidthLabel = new JLabel(" Line/Pen width: ");
+		textContentLabel = new JLabel(" Text content: ");
 
-		lineWidthLabel = new JLabel("Line width: ");
-		textContentLabel = new JLabel("Text content: ");
-
-		textSizeLabel = new JLabel("Text size: ");
+		textSizeLabel = new JLabel(" Text size: ");
 
 		rectangle = new JButton("rectangle");
 		circle = new JButton("circle");
@@ -107,17 +115,21 @@ public class msPaint {
 		front = new JButton("front");
 		back = new JButton("back");
 		pen = new JButton("pen");
-		save = new JButton("save");
+		export = new JButton("export");
 		undo = new JButton("undo");
 		line = new JButton("line");
 		text = new JButton("text");
 		clear = new JButton("clear");
+		save = new JButton("save");
+		load = new JButton("load");
 
 
-		frame.setSize(Width, Height);
-		// closes the window when closed and stops the program.
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		//sets the frame size
+		frame.setSize(Width, Height); 
+		//don't close the frame when the "x" is clicked so that the warning message can show
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		
+		//containers for the buttons (buttons in buttons1, 2, 3... buttons1, 2, 3 & main canvas in mainContainer)
 		JPanel mainContainer = new JPanel();
 		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
 
@@ -130,12 +142,11 @@ public class msPaint {
 		JPanel buttons3 = new JPanel();
 		buttons3.setLayout(new BoxLayout(buttons3, BoxLayout.X_AXIS));
 
+		@SuppressWarnings("serial")
 		JPanel canvas = new JPanel() {
 			public void paint(Graphics g) {
 				super.paint(g);
 				 
-				
-				// g.fillRect(0, 0, Width, Height - 100);
 				for (int i = 0; i < shapes.size(); i++) {
 					shapes.get(i).draw(g);
 				}
@@ -143,12 +154,14 @@ public class msPaint {
 			}
 		};
 
-		
+		//setting preferred size
 		canvas.setPreferredSize(new Dimension(Width, Height - 150));
 
+		//adding elements to the containers
 		buttons1.add(rectangle);
+		buttons1.add(circle); 
 		buttons1.add(line);
-		buttons1.add(circle);
+		buttons1.add(pen);
 		buttons1.add(lineWidthLabel);
 		buttons1.add(lineWidthField);
 
@@ -163,19 +176,22 @@ public class msPaint {
 		buttons3.add(move);
 		buttons3.add(front);
 		buttons3.add(back);
-		buttons3.add(pen);
-		buttons3.add(save);
+		buttons3.add(export);
 		buttons3.add(undo);
-		buttons3.add(clear);
+		buttons3.add(clear); 
+		buttons3.add(save);
+		buttons3.add(load);
 
+		//setting the preferred size of the containers and elements
 		buttons1.setPreferredSize(new Dimension(Width, 50));
 		buttons2.setPreferredSize(new Dimension(Width, 50));
 		buttons3.setPreferredSize(new Dimension(Width, 50));
 
-		lineWidthField.setMaximumSize(new Dimension(100, 50));
-		textSizeField.setMaximumSize(new Dimension(100, 50));
-		textContentField.setMaximumSize(new Dimension(100, 50));
-
+		lineWidthField.setMaximumSize(new Dimension(100, 25));
+		textSizeField.setMaximumSize(new Dimension(100, 25));
+		textContentField.setMaximumSize(new Dimension(100, 25));
+		
+		//adding buttons to the mainContainer
 		mainContainer.add(buttons1);
 		mainContainer.add(buttons2);
 		mainContainer.add(buttons3);
@@ -187,20 +203,17 @@ public class msPaint {
 			public void mouseClicked(MouseEvent e) {
 				// TODO Auto-generated method stub
 				if (drawingTopic == "text") {
+					
+					//adds a "text" object to shapes
 					shapes.add(new Text(textContentField.getText(), e.getPoint().x, e.getPoint().y, 
 							tempColor, Integer.parseInt(textSizeField.getText())));
 					frame.getContentPane().repaint();
 					
-					if (archive.size() == 15) {
-						archive.remove(0);
-					}
-					ArrayList<Shape> tempShapes = new ArrayList<>();
-					for (int i = 0; i < shapes.size(); i++) {
-						tempShapes.add(shapes.get(i).copy());
-					}
-					archive.add(tempShapes);
+					addToArchive();
+					
 				} else if (drawingTopic == "delete") {
 					
+					//deletes something if the mouse isOn it
 					for (int i = 0; i < shapes.size(); i++) {
 						if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
 							shapes.remove(i);
@@ -208,37 +221,26 @@ public class msPaint {
 					}
 					frame.getContentPane().repaint();
 					
-					if (archive.size() == 15) {
-						archive.remove(0);
-					}
-					ArrayList<Shape> tempShapes = new ArrayList<>();
-					for (int i = 0; i < shapes.size(); i++) {
-						tempShapes.add(shapes.get(i).copy());
-					}
-					archive.add(tempShapes);
+					addToArchive();
 					
 				} else if (drawingTopic == "front") {
 					
-					for (int i = shapes.size(); i < 0; i--) {
+					//moves something that the mouse is hovering over to the top of the shapes array so that it's drawn last (on the top)
+					for (int i = shapes.size() - 1; i > -1 ; i--) {
+					
 						if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
 							shapes.add(shapes.get(i));
 							shapes.remove(i);
 							break;	
 						}
 					}
-					frame.getContentPane().repaint();
+					frame.getContentPane().repaint();	
 					
-					if (archive.size() == 15) {
-						archive.remove(0);
-					}
-					ArrayList<Shape> tempShapes = new ArrayList<>();
-					for (int i = 0; i < shapes.size(); i++) {
-						tempShapes.add(shapes.get(i).copy());
-					}
-					archive.add(tempShapes);
+					addToArchive();
 					
 				}else if (drawingTopic == "back") {
 					
+					//moves something that the mouse is hovering over to the bottom of the shapes array so that it's drawn first (on the bottom)
 					for (int i = 0; i < shapes.size(); i++) {
 						if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
 							shapes.add(0, shapes.get(i));
@@ -248,50 +250,44 @@ public class msPaint {
 					}
 					frame.getContentPane().repaint();
 					
-					if (archive.size() == 15) {
-						archive.remove(0);
-					}
-					ArrayList<Shape> tempShapes = new ArrayList<>();
-					for (int i = 0; i < shapes.size(); i++) {
-						tempShapes.add(shapes.get(i).copy());
-					}
-					archive.add(tempShapes);
+					addToArchive();
 				} 
-				//System.out.println(archive);
 
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
 				// TODO Auto-generated method stub
-				holding = true;
 				if (drawingTopic == "rectangle") {
 					if (drawing == false) {
-						x1Temp = e.getPoint().x;
-						y1Temp = e.getPoint().y;
-						shapes.add(new Rectangle(x1Temp, y1Temp, x1Temp, y1Temp, tempColor));
+						//in this case, xTemp & yTemp pose as x1 and y1 for the shapes
+						xTemp = e.getPoint().x;
+						yTemp = e.getPoint().y;
+						shapes.add(new Rectangle(xTemp, yTemp, xTemp, yTemp, tempColor));
 						drawing = true;
 					} 
 				} else if (drawingTopic == "circle") {
 					if (drawing == false) {
-						x1Temp = e.getPoint().x;
-						y1Temp = e.getPoint().y;
-						shapes.add(new Circle(x1Temp, y1Temp, x2Temp, y2Temp, tempColor));
+						//in this case, xTemp & yTemp pose as x1 and y1 for the shapes
+						xTemp = e.getPoint().x;
+						yTemp = e.getPoint().y;
+						shapes.add(new Circle(xTemp, yTemp, xTemp, yTemp, tempColor));
 						drawing = true;
 					} 
 				} else if (drawingTopic == "line") {
 					if (drawing == false) {
-						x1Temp = e.getPoint().x;
-						y1Temp = e.getPoint().y;
-						shapes.add(new Line(x1Temp, y1Temp, x2Temp, y2Temp, tempColor, lineWidth));
+						//in this case, xTemp & yTemp pose as x1 and y1 for the shapes
+						xTemp = e.getPoint().x;
+						yTemp = e.getPoint().y;
+						shapes.add(new Line(xTemp, yTemp, xTemp, yTemp, tempColor, lineWidth));
 						drawing = true;
 
 					} 
 				} else if (drawingTopic == "move") {
-					//System.out.println(drawing);
 					if (drawing == false) {
-						x1Temp = e.getPoint().x;
-						y1Temp = e.getPoint().y;
+						//in this case, xTemp & yTemp pose as the initial position of the shape. 
+						xTemp = e.getPoint().x;
+						yTemp = e.getPoint().y;
 						for (int i = 0; i < shapes.size(); i++) {
 							if (shapes.get(i).isOn(e.getPoint().x, e.getPoint().y) == true) {
 								moving = true;
@@ -299,97 +295,61 @@ public class msPaint {
 								break;
 							}
 						}
-
+						//mouse position - shapes.get(i).x1/y1 = the displacement from x1/y1 of the shape
 						MDX = e.getX() - shapes.get(movingIndex).x1;
 						MDY = e.getY() - shapes.get(movingIndex).y1; 
 						drawing = true;
 
 					} 
 				} else if (drawingTopic == "pen") {
+					
+					
 					if (drawing == false) {
 						
 						shapes.add(new Pen(tempColor, lineWidth, new ArrayList<Pixel>()));
 						drawing = true;
+						
 					} 
 				}
+				
+				//so that if there are changes made, they can be saved. 
+				saved = false;
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				// TODO Auto-generated method stub
-				holding = false;
 				if (drawingTopic == "rectangle") {
+					
+					//if the user was drawing, then the user is no longer drawing, and their change is added to the archive. 
 					if (drawing == true) {
-						x2Temp = e.getPoint().x;
-						y2Temp = e.getPoint().y;
 						drawing = false;
 						
-						if (archive.size() == 15) {
-							archive.remove(0);
-						}
-						ArrayList<Shape> tempShapes = new ArrayList<>();
-						for (int i = 0; i < shapes.size(); i++) {
-							tempShapes.add(shapes.get(i).copy());
-						}
-						archive.add(tempShapes);
+						addToArchive();
 					}
 				} else if (drawingTopic == "circle") {
 					if (drawing == true) {
-						x2Temp = e.getPoint().x;
-						y2Temp = e.getPoint().y;
 						drawing = false;
-						if (archive.size() == 15) {
-							archive.remove(0);
-						}
-						ArrayList<Shape> tempShapes = new ArrayList<>();
-						for (int i = 0; i < shapes.size(); i++) {
-							tempShapes.add(shapes.get(i).copy());
-						}
-						archive.add(tempShapes);
+						
+						addToArchive(); 
 					}
 				} else if (drawingTopic == "line") {
 					if (drawing == true) {
-						x2Temp = e.getPoint().x;
-						y2Temp = e.getPoint().y;
 						drawing = false;
-						frame.getContentPane().repaint();
 						
-						if (archive.size() == 15) {
-							archive.remove(0);
-						}
-						ArrayList<Shape> tempShapes = new ArrayList<>();
-						for (int i = 0; i < shapes.size(); i++) {
-							tempShapes.add(shapes.get(i).copy());
-						}
-						archive.add(tempShapes);
+						addToArchive();
 					}
 				} else if (drawingTopic == "move") {
 					
 					moving = false;
 					
-					if (archive.size() == 15) {
-						archive.remove(0);
-					}
-					drawing = false;
-					ArrayList<Shape> tempShapes = new ArrayList<>();
-					for (int i = 0; i < shapes.size(); i++) {
-						tempShapes.add(shapes.get(i).copy());
-					}
-					archive.add(tempShapes);
+					addToArchive();
 				} else if (drawingTopic == "pen") {
 					drawing = false;
-					frame.getContentPane().repaint();
 					
-					if (archive.size() == 15) {
-						archive.remove(0);
-					}
-					ArrayList<Shape> tempShapes = new ArrayList<>();
-					for (int i = 0; i < shapes.size(); i++) {
-						tempShapes.add(shapes.get(i).copy());
-					}
-					archive.add(tempShapes);
-					
+					addToArchive();
 				}
+				saved = false;
 			}
 
 			@Override
@@ -412,15 +372,15 @@ public class msPaint {
 			public void mouseDragged(MouseEvent e) {
 				// TODO Auto-generated method stub
 				if (drawingTopic == "rectangle") {
-					shapes.get(shapes.size() - 1).resize(x1Temp, y1Temp, e.getPoint().x, e.getPoint().y);
+					shapes.get(shapes.size() - 1).resize(xTemp, yTemp, e.getPoint().x, e.getPoint().y);
 				} else if (drawingTopic == "circle") {
-					shapes.get(shapes.size() - 1).resize(x1Temp, y1Temp, e.getPoint().x, e.getPoint().y);
+					shapes.get(shapes.size() - 1).resize(xTemp, yTemp, e.getPoint().x, e.getPoint().y);
 				} else if (drawingTopic == "line") {
-					shapes.get(shapes.size() - 1).resize(x1Temp, y1Temp, e.getPoint().x, e.getPoint().y);
+					shapes.get(shapes.size() - 1).resize(xTemp, yTemp, e.getPoint().x, e.getPoint().y);
 				} else if (drawingTopic == "pen") {
+					//0's are extra values because resize for pen only takes two values. 
 					shapes.get(shapes.size() - 1).resize(e.getPoint().x, e.getPoint().y, 0, 0);
 				} else if (drawingTopic == "move") {
-					//shapes.get(shapes.size() - 1).move(x1Temp, y1Temp, e.getPoint().x, e.getPoint().y);
 					if (moving == true) {
 						shapes.get(movingIndex).move(MDX, MDY, e.getPoint().x, e.getPoint().y);
 						MDX = e.getX() - shapes.get(movingIndex).x1;
@@ -457,6 +417,7 @@ public class msPaint {
 		line.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				drawingTopic = "line";
+				//gets the value of lineWidthField and equates that to the lineWidth. Otherwise it is defaulted to 4. 
 				if (lineWidthField.getText().equals("") == false) {
 					lineWidth = Integer.parseInt(lineWidthField.getText());
 				} else {
@@ -469,9 +430,9 @@ public class msPaint {
 			public void actionPerformed(ActionEvent e) {
 				drawingTopic = "text";
 				if (textSizeField.getText().equals("") == false) {
-					textSize= Integer.parseInt(textSizeField.getText());
+					Integer.parseInt(textSizeField.getText());
 				} else {
-					textSize = 20;
+					
 				}
 			}
 		});
@@ -479,6 +440,7 @@ public class msPaint {
 		chooseColor.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
+				//opens a JColorChooser to help choose the color. 
 				tempColor = JColorChooser.showDialog(null, "Choose a color", Color.RED);
 				
 			}
@@ -521,6 +483,7 @@ public class msPaint {
 			public void actionPerformed(ActionEvent e) {
 	    		
 				drawingTopic = "pen";
+				//the temporary lineWidth is equated to the number in the lineWidthField otherwise it is defaulted t 4
 				if (lineWidthField.getText().equals("") == false) {
 					lineWidth = Integer.parseInt(lineWidthField.getText());
 				} else {
@@ -530,26 +493,45 @@ public class msPaint {
 			}
 		});
 
-		save.addActionListener(new ActionListener() {
+		export.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-	    		
-				BufferedImage image=new BufferedImage(canvas.getWidth(), canvas.getHeight(),BufferedImage.TYPE_INT_RGB);
 				
-				Graphics2D g2=(Graphics2D)image.getGraphics();
+			    JFileChooser fileChooser= new JFileChooser();
+			    
+			    //("image") is the temporary name of the file that the user changes
+			    fileChooser.setSelectedFile(new File("Image"));
+			    //the window
+			    int returnVal = fileChooser.showSaveDialog(null);
+			    
+			    if (returnVal == JFileChooser.APPROVE_OPTION) {
+			        File fileToSave = fileChooser.getSelectedFile();
+			        try{
+			        	//getting the image of the g2
+			        	BufferedImage image=new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
+						Graphics2D g2=(Graphics2D)image.getGraphics();
+			        	canvas.paint(g2);
+			        	
+						try {
+							//writes the file to the location from the JFileChooser
+							ImageIO.write(image, "png", new File(fileToSave.getAbsolutePath() + ".png"));
+						} catch (Exception e1) {
+							
+						}
+			        }
+			        catch(Exception e1){
+			        	
+			        }
+			    }
+				 
 				
 				
-				canvas.paint(g2);
-				try {
-					ImageIO.write(image, "png", new File("shot.png"));
-				} catch (Exception e1) {
-					
-				}
 			}
 		});
 
 		undo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//System.out.println(archive);
+				//equates the current shapes to the topmost index of archives and deletes that index
+				//catches bug when archive.size() == 1
 				if (archive.size() > 1) {
 					shapes = archive.get(archive.size() - 2);
 					archive.remove(archive.size() - 1);
@@ -565,16 +547,267 @@ public class msPaint {
 		clear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				shapes.clear();
-				if (archive.size() == 15) {
-					archive.remove(0);
-				}
-				ArrayList<Shape> tempShapes = new ArrayList<>();
-				for (int i = 0; i < shapes.size(); i++) {
-					tempShapes.add(shapes.get(i).copy());
-				}
-				archive.add(tempShapes);
+				
 				frame.getContentPane().repaint();
+				
+				addToArchive();
 			}
+		});
+		
+		save.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (curFile == null) {
+					//chooses a file name and location (default name "Save File")
+				    JFileChooser fileChooser= new JFileChooser();
+				    fileChooser.setSelectedFile(new File("Save File"));
+				    int returnVal = fileChooser.showSaveDialog(null);
+				    if (returnVal == JFileChooser.APPROVE_OPTION) {
+				        File fileToSave = fileChooser.getSelectedFile();
+				        curFile = fileToSave.getAbsolutePath() + ".txt";
+				        try{
+				        	FileWriter myWriter = new FileWriter(curFile);
+				            for (int i = 0; i < shapes.size(); i++) {
+				            	//calls the write function which is basically "toString" for shapes
+								myWriter.write(shapes.get(i).write() + "s");
+							}
+				            myWriter.close();
+				        }
+				        catch(Exception e1){
+				        	
+				        }
+				    }
+				    saved = true;
+				} else {
+					try {
+						new FileWriter(curFile, false).close();
+						FileWriter myWriter = new FileWriter(curFile);
+			            for (int i = 0; i < shapes.size(); i++) {
+							myWriter.write(shapes.get(i).write() + "s");
+						}
+			            myWriter.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+			}
+		});
+		
+		load.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				if (saved == false && shapes.size() > 0) {
+					//asks if the user wants to save
+					int input = JOptionPane.showConfirmDialog(null, "Your current image is not saved. Are you Sure you want to load a new image?", "WARNING!", 2);
+					if (input == 0) {
+						JFileChooser j = new JFileChooser();
+						// Open the save dialog
+						int result = j.showOpenDialog(null);
+						@SuppressWarnings("unused")
+						Scanner sc = null;
+						if (result == JFileChooser.APPROVE_OPTION) {
+							File f = j.getSelectedFile();
+							curFile = f.getAbsolutePath();
+							try {
+								sc = new Scanner(f);
+							} catch (FileNotFoundException e1) {
+								e1.printStackTrace();
+							}
+						}
+						//the character "s" refers to a new shape
+						String raw = sc.next();
+						String[] shapesTemp = raw.split("s");
+						shapes = new ArrayList<Shape>();
+						for (int i = 0; i < shapesTemp.length; i++) {
+							//the character "a" refers to an attribute of the shape (coordinates, color, etc. )
+							String attributesTemp[] = shapesTemp[i].split("a");
+							if (attributesTemp[0].equals("Circle")) {
+								shapes.add(new Circle(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+										Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), 
+										new Color(Integer.valueOf(attributesTemp[5]), Integer.valueOf(attributesTemp[6]), 
+												Integer.valueOf(attributesTemp[7]))));
+							} else if (attributesTemp[0].equals("Line")) {
+								shapes.add(new Line(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+										Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), 
+										new Color(Integer.valueOf(attributesTemp[5]), Integer.valueOf(attributesTemp[6]), 
+												Integer.valueOf(attributesTemp[7])), Integer.valueOf(attributesTemp[8])));
+							} else if (attributesTemp[0].equals("Pen")) {
+								
+								shapes.add(new Pen(new Color(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+										Integer.valueOf(attributesTemp[3])), Integer.valueOf(attributesTemp[4]), new ArrayList<Pixel>()));
+								
+								String[] tempText = Arrays.copyOfRange(attributesTemp, 5, attributesTemp.length);
+								
+								//read function so that the function doesn't make changes outside to the ArrayList<PixeL> inside of the function
+								shapes.get(i).read(tempText);
+								
+								//"a" taken out of rectangle to not be confused with the attribute splitter. 
+							} else if (attributesTemp[0].equals("Rectngle")) {
+								shapes.add(new Rectangle(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+										Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), 
+										new Color(Integer.valueOf(attributesTemp[5]), Integer.valueOf(attributesTemp[6]), 
+												Integer.valueOf(attributesTemp[7]))));
+							} else if (attributesTemp[0].equals("Text")) {
+								String tempText = "";
+								//each character is sorted into one attribute and this turns them back into characters 
+								for (int k = 7; k < attributesTemp.length; k++) {
+									tempText += (char) Integer.valueOf(attributesTemp[k]).intValue(); 
+								} 
+								shapes.add(new Text(tempText, Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+										new Color(Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), Integer.valueOf(attributesTemp[5])), 
+										Integer.valueOf(attributesTemp[6])));
+							}
+							saved = true;
+							frame.getContentPane().repaint();
+						}
+					}
+				} else {
+					JFileChooser j = new JFileChooser();
+					// Open the save dialog
+					int result = j.showOpenDialog(null);
+					@SuppressWarnings("unused")
+					Scanner sc = null;
+					if (result == JFileChooser.APPROVE_OPTION) {
+						File f = j.getSelectedFile();
+						curFile = f.getAbsolutePath();
+						try {
+							sc = new Scanner(f);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					String raw = sc.next();
+					String[] shapesTemp = raw.split("s");
+					shapes = new ArrayList<Shape>();
+					for (int i = 0; i < shapesTemp.length; i++) {
+						String attributesTemp[] = shapesTemp[i].split("a");
+						if (attributesTemp[0].equals("Circle")) {
+							shapes.add(new Circle(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+									Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), 
+									new Color(Integer.valueOf(attributesTemp[5]), Integer.valueOf(attributesTemp[6]), 
+											Integer.valueOf(attributesTemp[7]))));
+						} else if (attributesTemp[0].equals("Line")) {
+							shapes.add(new Line(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+									Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), 
+									new Color(Integer.valueOf(attributesTemp[5]), Integer.valueOf(attributesTemp[6]), 
+											Integer.valueOf(attributesTemp[7])), Integer.valueOf(attributesTemp[8])));
+						} else if (attributesTemp[0].equals("Pen")) {
+							
+							shapes.add(new Pen(new Color(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+									Integer.valueOf(attributesTemp[3])), Integer.valueOf(attributesTemp[4]), new ArrayList<Pixel>()));
+							
+							String[] tempText = Arrays.copyOfRange(attributesTemp, 5, attributesTemp.length);
+							shapes.get(i).read(tempText);
+							
+						} else if (attributesTemp[0].equals("Rectngle")) {
+							shapes.add(new Rectangle(Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+									Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), 
+									new Color(Integer.valueOf(attributesTemp[5]), Integer.valueOf(attributesTemp[6]), 
+											Integer.valueOf(attributesTemp[7]))));
+						} else if (attributesTemp[0].equals("Text")) {
+							String tempText = "";
+							for (int k = 7; k < attributesTemp.length; k++) {
+								tempText += (char) Integer.valueOf(attributesTemp[k]).intValue(); 
+							} 
+							shapes.add(new Text(tempText, Integer.valueOf(attributesTemp[1]), Integer.valueOf(attributesTemp[2]), 
+									new Color(Integer.valueOf(attributesTemp[3]), Integer.valueOf(attributesTemp[4]), Integer.valueOf(attributesTemp[5])), 
+									Integer.valueOf(attributesTemp[6])));
+						}
+						//System.out.println("shsdfas:" + attributesTemp[0]);
+						saved = true;
+						frame.getContentPane().repaint();
+					}
+				} 
+			}
+		});
+		
+		frame.addWindowListener(new WindowListener() {
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// TODO Auto-generated method stub
+				//the three button options so that it can be displayed in the joptionpane
+				String[] options = {"Save & Exit", "Don't Save", "Cancel"};
+				int input = JOptionPane.showOptionDialog(null, "Your current image is not saved. Are you Sure you want exit?", "WARNING!", 
+						JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		        if (input == 0) {
+		        	//same as the save function
+					if (curFile == null) {
+					    JFileChooser fileChooser= new JFileChooser();
+					    fileChooser.setSelectedFile(new File("Save File"));
+					    int returnVal = fileChooser.showSaveDialog(null);
+					    if (returnVal == JFileChooser.APPROVE_OPTION) {
+					        File fileToSave = fileChooser.getSelectedFile();
+					        curFile = fileToSave.getAbsolutePath() + ".txt";
+					        try{
+					        	FileWriter myWriter = new FileWriter(curFile);
+					            for (int i = 0; i < shapes.size(); i++) {
+									myWriter.write(shapes.get(i).write() + "s");
+								}
+					            myWriter.close();
+					        }
+					        catch(Exception e1){
+					        	
+					        }
+					    }
+					    saved = true;
+					} else {
+						try {
+							new FileWriter(curFile, false).close();
+							FileWriter myWriter = new FileWriter(curFile);
+				            for (int i = 0; i < shapes.size(); i++) {
+								myWriter.write(shapes.get(i).write() + "s");
+							}
+				            myWriter.close();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					System.exit(0);
+		        } else if (input == 1) {
+		        	System.exit(0);
+		        } 
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
 		});
 		
 		frame.add(mainContainer);
@@ -587,6 +820,7 @@ public class msPaint {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		//running the program
 		new msPaint();
 
 	}

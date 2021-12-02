@@ -2,9 +2,6 @@ package msPaints;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.*;
-import java.awt.geom.Line2D;
-import javax.swing.*;
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -13,7 +10,6 @@ public class Text extends Shape {
 	
 	private String text = "";
 	private int textSize;
-
 	private Font font;
 	
 	public Text(String text, int x1, int y1, Color c, int textSize) {
@@ -23,6 +19,7 @@ public class Text extends Shape {
 		this.y1 = y1;
 		this.color = c;
 		this.text = text;
+		this.textSize = textSize;
 		this.font = new Font("Helvetica", Font.PLAIN, textSize);
 	}
 
@@ -43,6 +40,8 @@ public class Text extends Shape {
 	@Override
 	public boolean isOn(int x, int y) {
 		// TODO Auto-generated method stub
+		
+		//affinetransform allows fontrendercontext to find the drawn bounds of the text. 
 		AffineTransform affinetransform = new AffineTransform();     
 		FontRenderContext frc = new FontRenderContext(affinetransform,true,true); 
 		int textWidth = (int)(font.getStringBounds(text, frc).getWidth());
@@ -58,6 +57,27 @@ public class Text extends Shape {
 
 	@Override
 	public void resize(int x1, int y1, int x2, int y2) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public String write() {
+		// TODO Auto-generated method stub
+		String returnVal = ("Text" + "a" + Integer.toString(this.x1) + "a" + Integer.toString(this.y1) + "a" + 
+							Integer.toString(this.color.getRed()) + "a" + Integer.toString(this.color.getBlue()) + "a" + 
+							Integer.toString(this.color.getGreen()) + "a" + Integer.toString(this.textSize));
+		
+		//all characters are written as their ascii code. 
+		for (int i = 0; i < this.text.length(); i++) {
+			returnVal += "a" + Integer.toString((int) this.text.charAt(i));
+		}
+		
+		return returnVal;
+	}
+	
+
+	@Override
+	protected void read(String[] tempText) {
 		// TODO Auto-generated method stub
 		
 	}

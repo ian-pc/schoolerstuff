@@ -69,4 +69,17 @@ public class Rectangle extends Shape {
 			
 		}
 		
+		public String write() {
+			return ("Rectngle" + "a" + Integer.toString(this.x1)  + "a" + Integer.toString(this.y1) + "a" + Integer.toString(this.x2) + "a" +
+					Integer.toString(this.y2) + "a" + Integer.toString(this.color.getRed()) + "a" 
+					+ Integer.toString(this.color.getBlue()) + "a" + Integer.toString(this.color.getGreen()));
+			
+		}
+
+		@Override
+		protected void read(String[] tempText) {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}

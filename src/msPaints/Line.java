@@ -2,7 +2,6 @@
 
 import java.awt.*;
 import java.awt.geom.Line2D;
-import javax.swing.*;
 
 public class Line extends Shape {
 	
@@ -39,6 +38,7 @@ public class Line extends Shape {
 		// TODO Auto-generated method stub
 
 		
+		//calculating the little area between the points and the edge of the drawn lines
 		double theta = Math.atan2((this.y2 - this.y1), (this.x2 - this.x1));
 		double o = Math.sin(theta)*(this.lineWidth/2);
 		double n = Math.cos(theta)*(this.lineWidth/2);
@@ -64,16 +64,8 @@ public class Line extends Shape {
 		double b1 = b - dist;
 		double b2 = b + dist;
 
-		
-//		System.out.println("m " + m);
-//		System.out.println("b1 " + b1);
-//		System.out.println("b2 " + b2);
-//		System.out.println("pm " + pm);
-//		System.out.println("pb1 " + pb1);
-//		System.out.println("pb2 " + pb2);
-//		System.out.println("dist " + dist);
-//		System.out.println();
 
+		//draw four lines parrallel and perpendiular to the edges of the line. If the mouse is inside those lines, isOn is returned
 		int boundx1, boundx2;
 		if (this.x1 < this.x2) {
 			boundx1 = this.x1;
@@ -104,9 +96,7 @@ public class Line extends Shape {
 			}
 		} else {
 			if (y > pm*x + pb1 && y < pm*x + pb2) {
-//			System.out.println("ye");
 				if (y > m*x + b1 && y < m*x + b2) {
-	//				System.out.println("ye2");
 					return true;
 				}
 			}
@@ -120,6 +110,19 @@ public class Line extends Shape {
 		// TODO Auto-generated method stub
 		this.x2 = x2;
 		this.y2 = y2;
+	}
+	 
+	public String write() {
+		return ("Line" + "a" + Integer.toString(this.x1) + "a" + Integer.toString(this.y1) + "a" + Integer.toString(this.x2) + "a" +
+				Integer.toString(this.y2) + "a" + Integer.toString(this.color.getRed()) + "a" + 
+				Integer.toString(this.color.getBlue()) + "a" + Integer.toString(this.color.getGreen()) + "a" + 
+				Integer.toString(this.lineWidth));
+	}
+
+	@Override
+	protected void read(String[] tempText) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

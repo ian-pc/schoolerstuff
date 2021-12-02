@@ -12,9 +12,12 @@ public abstract class Shape {
 	protected String type;
 	protected String text;
 	protected int textSize;
+	
+	//pen and line variables are needed so that they can be interacted with outside of the pen/line function especially in move
 	protected int lineWidth;
 	protected ArrayList<Pixel> pen;
 	protected ArrayList<Pixel> distFrom0;
+	
 	public Shape(int x1, int y1, int x2, int y2, Color c) {
 		this.x1 = x1;
 		this.y1 = y1;
@@ -70,5 +73,9 @@ public abstract class Shape {
 	public abstract boolean isOn(int x, int y);
 
 	public abstract void resize(int x1, int y1, int x2, int y2);
+	
+	public abstract String write();
+
+	protected abstract void read(String[] tempText);
 	
 }

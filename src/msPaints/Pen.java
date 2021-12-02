@@ -17,7 +17,6 @@ public class Pen extends Shape {
 			}
 		}
 		
-		
 		public Pen(Color c, int lineWidth, ArrayList<Pixel> pen) {
 			super(c, lineWidth, pen);
 			// TODO Auto-generated constructor stub
@@ -27,13 +26,11 @@ public class Pen extends Shape {
 			this.distFrom0 = new ArrayList<>();
 		}
 		
-
 		@Override
 		public Shape copy() {
 			// TODO Auto-generated method stub
 			return new Pen(this.color, this.lineWidth, this.pen);
 		}
-
 
 		@Override
 		public void draw(Graphics g) {
@@ -56,6 +53,7 @@ public class Pen extends Shape {
 		@Override
 		public boolean isOn(int x, int y) {
 			// TODO Auto-generated method stub
+			//runs the line isOn function but instead of this.x1/x2 and this.y1/y2 its pen.get(i) and pen.get(i-1);
 			for (int i = 1; i < pen.size(); i++) {
 				double theta = Math.atan2((pen.get(i - 1).y - pen.get(i).y), (pen.get(i - 1).x - pen.get(i).x));
 				double o = Math.sin(theta)*(this.lineWidth/2);
@@ -112,9 +110,7 @@ public class Pen extends Shape {
 					}
 				} else {
 					if (y > pm*x + pb1 && y < pm*x + pb2) {
-//					System.out.println("ye");
 						if (y > m*x + b1 && y < m*x + b2) {
-			//				System.out.println("ye2");
 							return true;
 						}
 					}
@@ -130,6 +126,28 @@ public class Pen extends Shape {
 			// TODO Auto-generated method stub
 			pen.add(new Pixel(x1, y1));
 			distFrom0.add(new Pixel(pen.get(0).x - x1, pen.get(0).y - y1));
+			//resizing simply adds a new point. 
+		}
+
+		
+		public String write() {
+			
+			String returnVal = ("Pen" + "a" + Integer.toString(this.color.getRed()) + "a" + Integer.toString(this.color.getBlue()) + "a" 
+								+ Integer.toString(this.color.getGreen()) + "a" + Integer.toString(this.lineWidth));
+			//all points are written as attributse
+			for (int i = 0; i < this.pen.size(); i++) {
+				 returnVal += "a" + Integer.toString(this.pen.get(i).x) + "a" + Integer.toString(this.pen.get(i).y);
+			}
+			return returnVal;
+			
+		}
+
+		@Override
+		protected void read(String[] tempText) {
+			// TODO Auto-generated method stub
+			for (int i = 0; i < tempText.length; i+=2) {
+				this.pen.add(new Pixel(Integer.valueOf(tempText[i]), Integer.valueOf(tempText[i+1])));
+			}
 		}
 
 		

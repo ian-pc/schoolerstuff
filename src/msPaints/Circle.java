@@ -26,6 +26,8 @@ public class Circle extends Shape {
 		public void draw(Graphics g) {
 			// TODO Auto-generated method stub
 			g.setColor(this.color);
+			
+			//using Pythagorean theorem to find the radius of the circle. 
 			radius = (int) Math.sqrt((this.x2 - this.x1)*(this.x2 - this.x1) + (this.y2 - this.y1)*(this.y2 - this.y1));
 			g.fillOval(this.x1 - radius, this.y1 - radius, 2 * radius, 2 * radius);
 		}
@@ -34,7 +36,8 @@ public class Circle extends Shape {
 		public boolean isOn(int x, int y) {
 			// TODO Auto-generated method stub
 
-			double distance = 0; //distance from center
+			//if the distance between the center of the circle and the mouse is lesser than the radius, the mouse is on the circle
+			double distance = 0; //distance from center using Pythagorean theorem
 			distance = Math.sqrt((x - this.x1)*(x - this.x1) + (y - this.y1)*(y - this.y1));
 			if (distance <= radius) {
 				return true;
@@ -47,6 +50,18 @@ public class Circle extends Shape {
 			// TODO Auto-generated method stub
 			this.x2 = x2;
 			this.y2 = y2;
+		}
+	
+		public String write() {
+			return ("Circle" + "a" + Integer.toString(this.x1) + "a" + Integer.toString(this.y1) + "a" + Integer.toString(this.x2) + "a" +
+					Integer.toString(this.y2) + "a" + Integer.toString(this.color.getRed()) 
+					+ "a" + Integer.toString(this.color.getBlue()) + "a" + Integer.toString(this.color.getGreen()));
+		}
+
+		@Override
+		protected void read(String[] tempText) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}
