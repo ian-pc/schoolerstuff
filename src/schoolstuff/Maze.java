@@ -1,41 +1,48 @@
 package schoolstuff;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Maze {
 
-	private int[] posDir = { 0, 1, 2, 3 };
-	private Random rnd = new Random();
-	private int dir = posDir[rnd.nextInt(posDir.length - 1)];
+	private ArrayList<String> posDir = new ArrayList<>(Arrays.asList("right", "left", "up", "down"));
+
+	private String dir;
 
 	private void newDir() {
 
-		int pos = rnd.nextInt(posDir.length - 1);
-		dir = posDir[pos];
+		int pos = (int) (Math.random() * (posDir.size()));
+		dir = posDir.get(pos);
+		System.out.println(posDir.get(pos));
 
-		int[] copy = new int[posDir.length - 1];
-
-		for (int i = 0, j = 0; i < posDir.length; i++) {
-			if (i != pos) {
-				copy[j++] = posDir[i];
-			}
-		}
-
-		posDir = copy;
+		posDir.remove(pos);
 
 	}
 
-	private final static int SIZE = 50;
+	private final static int SIZE = 25;
 	private static boolean[][] maze = new boolean[SIZE][SIZE];
-	private int tileX = 0;
-	private int tileY = (int) (Math.random() * (SIZE - 1));
+	private int tileX;
+	private int tileY;
 
 	// aMAZEing
 
-	private void makeDaMaze() {
+	private void makeDaMaze1() {
 
+		dir = "right";
+		tileX = 0;
+		tileY = (int) (Math.random() * (SIZE - 1));
+		
 		while (true) {
 
+			if (posDir.size() == 0) {
+				maze = new boolean[SIZE][SIZE];
+				tileX = 0;
+				tileY = (int) (Math.random() * (SIZE - 1)) + 2;
+				posDir = new ArrayList<>(Arrays.asList("right", "left", "up", "down"));
+				System.out.println("newMaze");
+				makeDaMaze1();
+				break;
+			}
 
 			if (tileX == SIZE - 1) {
 				maze[tileX][tileY] = true;
@@ -43,39 +50,40 @@ public class Maze {
 				break;
 			}
 
-			if (posDir.length == 0) {
-				maze = new boolean[SIZE][SIZE];
-				tileX = 0;
-				tileY = (int) (Math.random() * (SIZE - 1)) + 2;
-				System.out.println("newMaze");
-				makeDaMaze();
-				break;
-			}
 
 			maze[tileX][tileY] = true;
 
-			if (dir == 0) {
+			if (dir.equals("right")) {
 				
-				if (tileX == 1) {
-					newDir();
-					continue;
+				if (tileX < SIZE - 2) {
+					if (maze[tileX + 2][tileY] == true) {
+						newDir();
+						continue;
+					}
 				}
 				
-//				if (maze[tileX + 2][tileY] == true) {
-//					newDir();
-//					continue;
-//				}
-				
-				if (maze[tileX + 1][tileY + 1] == true || maze[tileX + 1][tileY - 1]) {
-					newDir();
-					continue;
+				if (tileY < SIZE - 1) {
+					if (maze[tileX + 1][tileY + 1] == true) {
+						newDir();
+						continue;
+					}
 				}
-				
+				if (tileY > 0) {
+					if (maze[tileX + 1][tileY - 1] == true) {
+						newDir();
+						continue;
+					}
+				}
 				tileX++;
 				
-			} else if (dir == 1) {
+			} else if (dir.equals("left")) {
 
 				if (tileX == 1) {
+					newDir();
+					continue;
+				}
+				
+				if (maze[tileX - 2][tileY] == true) {
 					newDir();
 					continue;
 				}
@@ -86,53 +94,239 @@ public class Maze {
 				}
 				
 				tileX--;
-			} else if (dir == 2) {
+			} else if (dir.equals("up")) {
 
 				if (tileY == SIZE - 2) {
 					newDir();
 					continue;
 				}
 				
-				if (maze[tileX + 1][tileY + 1] == true || maze[tileX - 1][tileY + 1] == true) {
+				if (maze[tileX][tileY + 2] == true) {
 					newDir();
 					continue;
-				} 
+				}
+				
+				
+				if (tileX > 0) {
+					if (maze[tileX - 1][tileY + 1] == true) {
+						newDir();
+						continue;
+					}
+				}
+				
+				if (tileX < SIZE - 1) {
+					if (maze[tileX + 1][tileY + 1] == true) {
+						newDir();
+						continue;
+					}
+				}
 				
 
 				tileY++;
 
-			} else if (dir == 3) {
+			} else if (dir.equals("down")) {
 
-				if (tileY == 1) {
+				if (tileY <= 1) {
 					newDir();
 					continue;
 				}
 				
-				if (maze[tileX + 1][tileY - 1] == true || maze[tileX - 1][tileY - 1] == true) {
-					newDir();
-					continue;
+				if (tileX > 1) {
+					if (maze[tileX][tileY - 2] == true) {
+						newDir();
+						continue;
+					}
 				}
+				
+				if (tileX > 0) {
+					if (maze[tileX - 1][tileY - 1] == true) {
+						newDir();
+						continue;
+					}
+				}
+				
+				if (tileX < SIZE - 1) {
+					if (maze[tileX + 1][tileY - 1] == true) {
+						newDir();
+						continue;
+					}
+				}
+				
 				
 				tileY--;
 			}
 
-			System.out.println("X: " + tileX + " Y: " + tileY + " direction: " + dir);
-			posDir = new int[4];
-			for (int i = 0; i < 4; i++) {
-				posDir[i] = i;
+
+			if (posDir.size() == 0) {
+				maze = new boolean[SIZE][SIZE];
+				tileX = 0;
+				tileY = (int) (Math.random() * (SIZE - 1)) + 2;
+				posDir = new ArrayList<>(Arrays.asList("right", "left", "up", "down"));
+				System.out.println("newMaze");
+				makeDaMaze1();
+				break;
 			}
 			
+			System.out.println("X: " + tileX + " Y: " + tileY + " direction: " + dir);
+			posDir = new ArrayList<>(Arrays.asList("right", "left", "up", "down"));
 			newDir();
 		}
 	}
 
-	
+	private void makeDaMaze2() {
+		
+		while (true) {
+			
+			double trueTiles = 0;
+			for (int i = 1; i < SIZE; i++) {
+				for (int j = 0; j < SIZE; j++) {
+					if (maze[i][j] == true) {
+						trueTiles++;
+					}
+				}
+			}
+			if (trueTiles/(double) SIZE*SIZE > 0.6) break;
+			
+			
+			for (int i = 1; i < SIZE - 2; i++) {
+				for (int j = 0; j < SIZE - 1; j++) {
+					if (maze[i][j] == true) {
+						
+						
+						
+
+						maze = new boolean[SIZE][SIZE];
+						tileX = 0;
+						tileY = (int) (Math.random() * (SIZE - 1)) + 2;
+						posDir = new ArrayList<>(Arrays.asList("right", "left", "up", "down"));
+						System.out.println("newMaze");
+						makeDaMaze1();
+
+						if (tileX == SIZE - 1) {
+							maze[tileX][tileY] = true;
+							System.out.println("DONE!");
+							break;
+						}
+
+
+						maze[tileX][tileY] = true;
+
+						if (dir.equals("right")) {
+							
+							if (tileX < SIZE - 2) {
+								if (maze[tileX + 2][tileY] == true) {
+									newDir();
+									continue;
+								}
+							}
+							
+							if (tileY < SIZE - 1) {
+								if (maze[tileX + 1][tileY + 1] == true) {
+									newDir();
+									continue;
+								}
+							}
+							if (tileY > 0) {
+								if (maze[tileX + 1][tileY - 1] == true) {
+									newDir();
+									continue;
+								}
+							}
+							tileX++;
+							
+						} else if (dir.equals("left")) {
+
+							if (tileX == 1) {
+								newDir();
+								continue;
+							}
+							
+							if (maze[tileX - 2][tileY] == true) {
+								newDir();
+								continue;
+							}
+							
+							if (maze[tileX - 1][tileY + 1] == true || maze[tileX - 1][tileY - 1] == true) {
+								newDir();
+								continue;
+							}
+							
+							tileX--;
+						} else if (dir.equals("up")) {
+
+							if (tileY == SIZE - 2) {
+								newDir();
+								continue;
+							}
+							
+							if (maze[tileX][tileY + 2] == true) {
+								newDir();
+								continue;
+							}
+							
+							
+							if (tileX > 0) {
+								if (maze[tileX - 1][tileY + 1] == true) {
+									newDir();
+									continue;
+								}
+							}
+							
+							if (tileX < SIZE - 1) {
+								if (maze[tileX + 1][tileY + 1] == true) {
+									newDir();
+									continue;
+								}
+							}
+							
+
+							tileY++;
+
+						} else if (dir.equals("down")) {
+
+							if (tileY <= 1) {
+								newDir();
+								continue;
+							}
+							
+							if (tileX > 1) {
+								if (maze[tileX][tileY - 2] == true) {
+									newDir();
+									continue;
+								}
+							}
+							
+							if (tileX > 0) {
+								if (maze[tileX - 1][tileY - 1] == true) {
+									newDir();
+									continue;
+								}
+							}
+							
+							if (tileX < SIZE - 1) {
+								if (maze[tileX + 1][tileY - 1] == true) {
+									newDir();
+									continue;
+								}
+							}
+							
+							
+							tileY--;
+						}
+					}
+				}
+			}
+		}
+		
+		
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
 		Maze runner = new Maze();
-		runner.makeDaMaze();
+		runner.makeDaMaze1();
+		runner.makeDaMaze2();
 
 		for (int i = 0; i < SIZE; i++) {
 			for (int j = 0; j < SIZE; j++) {
