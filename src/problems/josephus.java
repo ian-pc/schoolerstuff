@@ -46,7 +46,12 @@ public class josephus {
 		// TODO Auto-generated method stub
 
 		Scanner sc = new Scanner(System.in);
-		run(sc.nextInt());
+		
+		for (int i = 1; i < 100; i++) {
+			
+			run(i);
+		}
+		
 		
 		
 		
