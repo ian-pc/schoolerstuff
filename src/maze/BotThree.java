@@ -17,8 +17,11 @@ public class BotThree extends Bot{
 	public void move() {
 		// TODO Auto-generated method stub
 		
-		if (moveForward() == false) {
+		double a = Math.random();
+		if (a > 0.5) {
 			turnLeft();
+		} else {
+			moveForward();
 		}
 		
 	}
