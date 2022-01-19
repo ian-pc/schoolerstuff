@@ -12,22 +12,32 @@ public class Graphtime<E> {
 
 	private HashMap<E, Vertex> graph = new HashMap<>();
 
+  public class Edge {
+    public T info;
+    public Vertex v1, v2;
+    public Edge(T info, Vertex v1, Vertex v2) {
+      this.info = info;
+      this.v1 = v1;
+      this.v2 = v2;
+    }
+  }
+
 	public class Vertex {
 
 		public E info;
-		public Set<Vertex> neighbors = new HashSet<Vertex>();
+		public Set<Edge> neighbors = new HashSet<Edge>();
 
 		public Vertex(E info) {
 			this.info = info;
 		}
     
-    public String neighborsToString() {
-      String returnVal = "";
-      for (Vertex s : this.neighbors) {
-        returnVal += s.info;
-      }
-      return returnVal;
-    }
+    // public String neighborsToString() {
+    //   String returnVal = "";
+    //   for (Vertex s : this.neighbors) {
+    //     returnVal += s.info;
+    //   }
+    //   return returnVal;
+    // }
 	
 	}
 
@@ -45,9 +55,10 @@ public class Graphtime<E> {
 
 	}
 
-	public void connect(E v1, E v2) {
-		graph.get(v1).neighbors.add(graph.get(v2));
-		graph.get(v2).neighbors.add(graph.get(v1));
+	public void connect(E v1, E v2, T info) {
+    Edge<T> edge = new Edge<>(info, v1, v2);
+    graph.get(v1).neighbors.add(edge);
+    graph.get(v2).neighbors.add(edge);
 	}
 
 	public void remove(E info) {
