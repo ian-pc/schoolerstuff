@@ -1,5 +1,7 @@
 package problems;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,52 +12,57 @@ import java.util.Scanner;
 
 public class Actors {
 	
-	public HashMap<Integer, String> actors = new HashMap<>();
-	public HashMap<Integer, String> movies = new HashMap<>();
-	public HashMap<String, ArrayList<String>> tempSave= new HashMap<>();
-	public Labeledtime<String, String> map = new Labeledtime<>();
+	static HashMap<Integer, String> actors = new HashMap<>();
+	static HashMap<Integer, String> movies = new HashMap<>();
+	static HashMap<String, ArrayList<String>> tempSave= new HashMap<>();
+	static Labeledtime<String, String> map = new Labeledtime<>();
 	
-	public void readActors(String fileloc) {
+	public static void readActors(String fileloc) throws FileNotFoundException {
 		
-		Scanner sc = new Scanner(fileloc);
-		HashMap<Integer, String> tempMap = new HashMap<>();
-		while (sc.hasNext()) {
-			String temp = sc.next();
-			String[] temp2 = temp.split("~");
-			tempMap.put(Integer.valueOf(temp2[1]), temp2[0]);
-			map.addVertex(temp2[0]);
-			map.addVertex(temp2[1]);
+		Scanner sc = new Scanner(new File(fileloc));
+		
+		while (sc.hasNextLine()) {
+			String[] temp = sc.nextLine().split("~");
+			actors.put(Integer.valueOf(temp[0]), temp[1]);
+			map.addVertex(temp[0]);
+			map.addVertex(temp[1]);
 		}
-		actors = tempMap;
 	}
 	
-	public void readMovie(String fileloc) {
-		Scanner sc = new Scanner(fileloc);
-		HashMap<Integer, String> tempMap = new HashMap<>();
-		while (sc.hasNext()) {
-			String temp = sc.next();
-			String[] temp2 = temp.split("~");
-			tempMap.put(Integer.valueOf(temp2[1]), temp2[0]);
-		}
-		movies = tempMap;
-		
+	public static void TiffanyreadActors(String fileloc) throws FileNotFoundException {
+		File f = new File(fileloc);
+	    Scanner read = new Scanner(f);
+	    while(read.hasNextLine()) {
+	    	String[] s = read.nextLine().split("~");
+	    	System.out.println(s[1]);
+	    	actors.put(Integer.parseInt(s[0]),s[1]);
+	    	map.addVertex(s[1]); // ?
+	    }
 	}
 	
-	public void readActorsinMovie(String fileloc) {
-		Scanner sc = new Scanner(fileloc);
-		while (sc.hasNext()) {
-			String temp = sc.next();
-			String[] temp2 = temp.split("~");
-			if (tempSave.containsKey(temp2[0])) {
-				tempSave.get(temp2[0]).add(temp2[1]);
+	public static void readMovie(String fileloc) throws FileNotFoundException {
+		Scanner sc = new Scanner(new File(fileloc));
+		HashMap<Integer, String> tempMap = new HashMap<>();
+		while (sc.hasNextLine()) {
+			String[] temp = sc.nextLine().split("~");
+			movies.put(Integer.valueOf(temp[0]), temp[1]);
+		}		
+	}
+	
+	public static void readActorsinMovie(String fileloc) throws FileNotFoundException {
+		Scanner sc = new Scanner(new File(fileloc));
+		while (sc.hasNextLine()) {
+			String[] temp = sc.nextLine().split("~");
+			if (tempSave.containsKey(temp[0])) {
+				tempSave.get(temp[0]).add(temp[1]);
 			} else {
-				tempSave.put(temp2[0], new ArrayList<String>());
-				tempSave.get(temp2[0]).add(temp2[1]);
+				tempSave.put(temp[0], new ArrayList<String>());
+				tempSave.get(temp[0]).add(temp[1]);
 			}
 		}
 	}
 	
-	public void intoLabeltime() {
+	public static void intoLabeltime() {
 		for (String s : tempSave.keySet()) {
 			for (int i = 0; i < tempSave.get(s).size(); i++) {
 				for (int j = 0; j < tempSave.get(s).size(); j++) {
@@ -65,8 +72,13 @@ public class Actors {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		// TODO Auto-generated method stub
+		readActors("Files/actors.txt");
+		readMovie("Files/movies.txt");
+		readActorsinMovie("Files/movie-actors.txt");
+		intoLabeltime();
+		map.BFS("Brandon Blagg", "Jon Cook");
 	}
 
 }

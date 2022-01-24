@@ -85,10 +85,6 @@ public class Graphtime<E> {
 		return path;
 	}
 
-  public void Write(String fileloc) {
-    for
-  }
-
 	public ArrayList<Vertex> BFS(E startinfo, E endinfo) {
 
 		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
