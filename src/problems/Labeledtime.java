@@ -106,7 +106,7 @@ public class Labeledtime<E, T> {
 			cur = toVisit.remove(0);
 			// System.out.println("curr" + cur.info);
 			for (Edge s : cur.edges) {
-				System.out.println("ye");
+				//System.out.println("ye");
 				// System.out.println("neightbor: "+ s.info);
 				if (s.getNeighbor(cur) == end) {
 
