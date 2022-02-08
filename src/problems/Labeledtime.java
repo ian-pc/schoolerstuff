@@ -1,16 +1,18 @@
 package problems;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import problems.Graphtime.Vertex;
 
 public class Labeledtime<E, T> {
 
 	HashMap<E, Vertex> vertices;
-	int tempiter = 0;
 
 	public Labeledtime() {
 		vertices = new HashMap<E, Vertex>();
@@ -21,7 +23,6 @@ public class Labeledtime<E, T> {
 	}
 
 	public void connect(E info1, E info2, T label) {
-		tempiter++;
 		Vertex v1 = vertices.get(info1);
 		Vertex v2 = vertices.get(info2);
 		
@@ -36,9 +37,6 @@ public class Labeledtime<E, T> {
 			v1.edges.add(e);
 			v2.edges.add(e); 
 		}
-		
-		
-		
 	}
 
 	public String toString(Vertex v) {
@@ -112,9 +110,9 @@ public class Labeledtime<E, T> {
 
 					leadsTo.put(s.getNeighbor(cur), cur);
 					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
-					for (int i = 0; i < temp.size(); i++) {
-						System.out.println(temp.get(i).info);
-					}
+//					for (int i = 0; i < temp.size(); i++) {
+//						System.out.println(temp.get(i).info);
+//					}
 					return (BackTrace(leadsTo, start, end));
 
 				}
@@ -127,9 +125,178 @@ public class Labeledtime<E, T> {
 		return path;
 	}
 	
+	public ArrayList<E> infoBFS(E startinfo, E endinfo) {
+
+		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
+		ArrayList<Vertex> path = new ArrayList<>();
+
+		Vertex start = vertices.get(startinfo);
+		Vertex end = vertices.get(endinfo);
+		//System.out.println(end.info);
+		Vertex cur = start;
+
+		List<Vertex> toVisit = new ArrayList<>();
+		toVisit.add(cur);
+
+		// path.add(cur);
+		leadsTo.put(cur, null);
+
+		ArrayList<E> BackTraceTempT= new ArrayList<>();
+		while (toVisit.size() != 0) {
+
+			cur = toVisit.remove(0);
+			// System.out.println("curr" + cur.info);
+			for (Edge s : cur.edges) {
+				//System.out.println("ye");
+				// System.out.println("neightbor: "+ s.info);
+				if (s.getNeighbor(cur) == end) {
+
+					leadsTo.put(s.getNeighbor(cur), cur);
+					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
+					ArrayList<Vertex> BackTraceTemp = (BackTrace(leadsTo, start, end));
+					for (int i = 0; i < BackTraceTemp.size(); i++) {
+						BackTraceTempT.add(BackTraceTemp.get(i).info);
+					}
+					//System.out.println(BackTraceTempT);
+					return BackTraceTempT;
+				}
+				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
+					toVisit.add(s.getNeighbor(cur));
+					leadsTo.put(s.getNeighbor(cur), cur);
+				}
+			}
+		}
+		return null;
+	}
+	
+	public ArrayList<AbstractMap.SimpleEntry<E, T>> moviesBFS(E startinfo, E endinfo) {
+
+		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
+		ArrayList<Vertex> path = new ArrayList<>();
+
+		Vertex start = vertices.get(startinfo);
+		Vertex end = vertices.get(endinfo);
+		//System.out.println(end.info);
+		Vertex cur = start;
+
+		List<Vertex> toVisit = new ArrayList<>();
+		toVisit.add(cur);
+
+		// path.add(cur);
+		leadsTo.put(cur, null);
+
+		ArrayList<AbstractMap.SimpleEntry<E, T>> BackTraceTempT= new ArrayList<>();
+		HashMap<Edge, T> templist = new HashMap<>();
+		Iterator templistIter;
+		while (toVisit.size() != 0) {
+
+			cur = toVisit.remove(0);
+			// System.out.println("curr" + cur.info);
+			for (Edge s : cur.edges) {
+				//System.out.println("ye");
+				// System.out.println("neightbor: "+ s.info);
+				templist.put(s, s.label);
+				if (s.getNeighbor(cur) == end) {
+					templistIter = templist.entrySet().iterator();
+					leadsTo.put(s.getNeighbor(cur), cur);
+					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
+					for (int i = 0; i < temp.size(); i++) {
+						//System.out.println(temp.get(i).info);
+					}
+					ArrayList<Vertex> BackTraceTemp = (BackTrace(leadsTo, start, end));
+					for (int i = 0; i < BackTraceTemp.size(); i++) {
+						BackTraceTempT.add(new AbstractMap.SimpleEntry(BackTraceTemp.get(i).info, templistIter.next().toString().split("=")[1]));
+					}
+//					System.out.println(BackTraceTempT);
+					return BackTraceTempT;
+				}
+				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
+					templist.remove(s);
+					toVisit.add(s.getNeighbor(cur));
+					leadsTo.put(s.getNeighbor(cur), cur);
+				}
+			}
+		}
+		return null;
+	}
+
+	public E findFurthest(E info) {
+		E furthest = null;
+		
+		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
+		ArrayList<Vertex> path = new ArrayList<>();
+
+		Vertex start = vertices.get(info);
+		//System.out.println(end.info);
+		Vertex cur = start;
+
+		List<Vertex> toVisit = new ArrayList<>();
+		toVisit.add(cur);
+
+		// path.add(cur);
+		leadsTo.put(cur, null);
+
+		while (toVisit.size() != 0) {
+
+			cur = toVisit.remove(0);
+			furthest = cur.info;
+			// System.out.println("curr" + cur.info);
+			for (Edge s : cur.edges) {
+				//System.out.println("ye");
+				// System.out.println("neightbor: "+ s.info);
+				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
+					toVisit.add(s.getNeighbor(cur));
+					leadsTo.put(s.getNeighbor(cur), cur);
+				}
+			}
+		}
+		
+		return furthest;
+	}
+	
+	public ArrayList<E> findDistAway(int dist, E info) {
+		ArrayList<E> returnVal = new ArrayList<>();
+		
+		
+		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
+		ArrayList<Vertex> path = new ArrayList<>();
+
+		Vertex start = vertices.get(info);
+		//System.out.println(end.info);
+		Vertex cur = start;
+
+		List<Vertex> toVisit = new ArrayList<>();
+		toVisit.add(cur);
+
+		// path.add(cur);
+		leadsTo.put(cur, null);
+
+		int tempCount = 0;
+		while (toVisit.size() != 0) {
+
+			cur = toVisit.remove(0);
+			// System.out.println("curr" + cur.info);
+			for (Edge s : cur.edges) {
+				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
+					toVisit.add(s.getNeighbor(cur));
+					leadsTo.put(s.getNeighbor(cur), cur);
+				}
+				if (tempCount == dist) {
+					returnVal.add(s.getNeighbor(cur).info);
+				}
+			}
+			if (tempCount == dist) {
+				break;
+			}
+			tempCount++;
+		}
+		
+		return returnVal;
+	}
 	
 	public static void main(String[] args) {
 
+		
 
 	}
 }
