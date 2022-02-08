@@ -14,20 +14,21 @@ public class Labeledtime<E, T> {
 
 	HashMap<E, Vertex> vertices;
 
+	//creates a new hashmap called vertices
 	public Labeledtime() {
 		vertices = new HashMap<E, Vertex>();
 	}
 
+	//creates a new vertice and adds it to the hashmap
 	public void addVertex(E info) {
 		vertices.put(info, new Vertex(info));
 	}
 
+	//creates an edge and connects the variables to eachother
 	public void connect(E info1, E info2, T label) {
 		Vertex v1 = vertices.get(info1);
 		Vertex v2 = vertices.get(info2);
 		
-		//System.out.println(v1.info + " " + v2.info + "iter: " + tempiter);
-
 		if (v1 == null || v2 == null) {
 			System.out.println("Vertex " + (v1 == null ? v1 : v2).info + " not found");
 			return;
@@ -39,10 +40,12 @@ public class Labeledtime<E, T> {
 		}
 	}
 
+	//.toString()
 	public String toString(Vertex v) {
 		return (String) v.info;
 	}
 	
+	//a datatype which represents a relationship between vertices with a name (label)
 	private class Edge {
 		T label;
 		Vertex v1, v2;
@@ -53,6 +56,7 @@ public class Labeledtime<E, T> {
 			this.v2 = v2;
 		}
 
+		//gets the neighbor of a vertice of an edge 
 		public Vertex getNeighbor(Vertex v) {
 			if (v.info.equals(v1.info)) {
 				return v2;
@@ -62,6 +66,7 @@ public class Labeledtime<E, T> {
 
 	}
 
+	//datatype of a vertex
 	private class Vertex {
 		E info;
 		HashSet<Edge> edges;
@@ -72,6 +77,8 @@ public class Labeledtime<E, T> {
 		}
 	}
 
+	
+	//returns the path in the form of an ArrayList of start to end vertices given a hashmap of leading
 	public ArrayList<Vertex> BackTrace(HashMap<Vertex, Vertex> leadsTo, Vertex start, Vertex end) {
 		ArrayList<Vertex> path = new ArrayList<Vertex>();
 		Vertex cur = end;
@@ -83,39 +90,36 @@ public class Labeledtime<E, T> {
 		return path;
 	}
 	
+	//BFS
 	public ArrayList<Vertex> BFS(E startinfo, E endinfo) {
 
+		//a hashmap with each key being a vertex which connects to it's value that is also a vertex
 		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
 		ArrayList<Vertex> path = new ArrayList<>();
 
 		Vertex start = vertices.get(startinfo);
 		Vertex end = vertices.get(endinfo);
-		//System.out.println(end.info);
 		Vertex cur = start;
 
+		//a list of vertices on the current layer of the graph
 		List<Vertex> toVisit = new ArrayList<>();
 		toVisit.add(cur);
 
-		// path.add(cur);
 		leadsTo.put(cur, null);
 
 		while (toVisit.size() != 0) {
 
 			cur = toVisit.remove(0);
-			// System.out.println("curr" + cur.info);
 			for (Edge s : cur.edges) {
-				//System.out.println("ye");
-				// System.out.println("neightbor: "+ s.info);
+				//if the current edge contains the end vertex, return it's backtrace. 
 				if (s.getNeighbor(cur) == end) {
 
 					leadsTo.put(s.getNeighbor(cur), cur);
 					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
-//					for (int i = 0; i < temp.size(); i++) {
-//						System.out.println(temp.get(i).info);
-//					}
 					return (BackTrace(leadsTo, start, end));
 
 				}
+				//otherwise, go down a deeper layer and add another variable to leadsTo
 				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
 					toVisit.add(s.getNeighbor(cur));
 					leadsTo.put(s.getNeighbor(cur), cur);
@@ -125,6 +129,7 @@ public class Labeledtime<E, T> {
 		return path;
 	}
 	
+	//returns a BFS but with an array of the info instead of the vertex itself
 	public ArrayList<E> infoBFS(E startinfo, E endinfo) {
 
 		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
@@ -132,23 +137,20 @@ public class Labeledtime<E, T> {
 
 		Vertex start = vertices.get(startinfo);
 		Vertex end = vertices.get(endinfo);
-		//System.out.println(end.info);
 		Vertex cur = start;
 
 		List<Vertex> toVisit = new ArrayList<>();
 		toVisit.add(cur);
 
-		// path.add(cur);
 		leadsTo.put(cur, null);
 
 		ArrayList<E> BackTraceTempT= new ArrayList<>();
 		while (toVisit.size() != 0) {
 
 			cur = toVisit.remove(0);
-			// System.out.println("curr" + cur.info);
+			
 			for (Edge s : cur.edges) {
-				//System.out.println("ye");
-				// System.out.println("neightbor: "+ s.info);
+
 				if (s.getNeighbor(cur) == end) {
 
 					leadsTo.put(s.getNeighbor(cur), cur);
@@ -157,7 +159,6 @@ public class Labeledtime<E, T> {
 					for (int i = 0; i < BackTraceTemp.size(); i++) {
 						BackTraceTempT.add(BackTraceTemp.get(i).info);
 					}
-					//System.out.println(BackTraceTempT);
 					return BackTraceTempT;
 				}
 				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
@@ -169,6 +170,7 @@ public class Labeledtime<E, T> {
 		return null;
 	}
 	
+	//returns a BFS but with a pair that has the info of the vertices as well as the name of the edge that they are connected by. 
 	public ArrayList<AbstractMap.SimpleEntry<E, T>> moviesBFS(E startinfo, E endinfo) {
 
 		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
@@ -176,13 +178,11 @@ public class Labeledtime<E, T> {
 
 		Vertex start = vertices.get(startinfo);
 		Vertex end = vertices.get(endinfo);
-		//System.out.println(end.info);
 		Vertex cur = start;
 
 		List<Vertex> toVisit = new ArrayList<>();
 		toVisit.add(cur);
 
-		// path.add(cur);
 		leadsTo.put(cur, null);
 
 		ArrayList<AbstractMap.SimpleEntry<E, T>> BackTraceTempT= new ArrayList<>();
@@ -191,23 +191,17 @@ public class Labeledtime<E, T> {
 		while (toVisit.size() != 0) {
 
 			cur = toVisit.remove(0);
-			// System.out.println("curr" + cur.info);
 			for (Edge s : cur.edges) {
-				//System.out.println("ye");
-				// System.out.println("neightbor: "+ s.info);
+
 				templist.put(s, s.label);
 				if (s.getNeighbor(cur) == end) {
 					templistIter = templist.entrySet().iterator();
 					leadsTo.put(s.getNeighbor(cur), cur);
 					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
-					for (int i = 0; i < temp.size(); i++) {
-						//System.out.println(temp.get(i).info);
-					}
 					ArrayList<Vertex> BackTraceTemp = (BackTrace(leadsTo, start, end));
 					for (int i = 0; i < BackTraceTemp.size(); i++) {
 						BackTraceTempT.add(new AbstractMap.SimpleEntry(BackTraceTemp.get(i).info, templistIter.next().toString().split("=")[1]));
 					}
-//					System.out.println(BackTraceTempT);
 					return BackTraceTempT;
 				}
 				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
@@ -219,7 +213,9 @@ public class Labeledtime<E, T> {
 		}
 		return null;
 	}
-
+	
+	
+	//finds the furthest vertex from a point in a graph
 	public E findFurthest(E info) {
 		E furthest = null;
 		
@@ -227,23 +223,18 @@ public class Labeledtime<E, T> {
 		ArrayList<Vertex> path = new ArrayList<>();
 
 		Vertex start = vertices.get(info);
-		//System.out.println(end.info);
 		Vertex cur = start;
 
 		List<Vertex> toVisit = new ArrayList<>();
 		toVisit.add(cur);
-
-		// path.add(cur);
 		leadsTo.put(cur, null);
 
+		//unlike BFS. keeps going until there are no edges to visit and that is the return val
 		while (toVisit.size() != 0) {
 
 			cur = toVisit.remove(0);
 			furthest = cur.info;
-			// System.out.println("curr" + cur.info);
 			for (Edge s : cur.edges) {
-				//System.out.println("ye");
-				// System.out.println("neightbor: "+ s.info);
 				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
 					toVisit.add(s.getNeighbor(cur));
 					leadsTo.put(s.getNeighbor(cur), cur);
@@ -254,6 +245,8 @@ public class Labeledtime<E, T> {
 		return furthest;
 	}
 	
+	
+	//finds the furthest distance away from a point
 	public ArrayList<E> findDistAway(int dist, E info) {
 		ArrayList<E> returnVal = new ArrayList<>();
 		
@@ -262,20 +255,17 @@ public class Labeledtime<E, T> {
 		ArrayList<Vertex> path = new ArrayList<>();
 
 		Vertex start = vertices.get(info);
-		//System.out.println(end.info);
 		Vertex cur = start;
 
 		List<Vertex> toVisit = new ArrayList<>();
 		toVisit.add(cur);
 
-		// path.add(cur);
 		leadsTo.put(cur, null);
 
 		int tempCount = 0;
 		while (toVisit.size() != 0) {
 
 			cur = toVisit.remove(0);
-			// System.out.println("curr" + cur.info);
 			for (Edge s : cur.edges) {
 				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
 					toVisit.add(s.getNeighbor(cur));

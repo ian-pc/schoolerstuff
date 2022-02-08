@@ -40,6 +40,7 @@ public class KevinBacon {
 	public ArrayList<String> actorsString;
 	public HashMap<String, String> movies = new HashMap<>();
 	public HashMap<String, ArrayList<String>> tempMoviesActors = new HashMap<>();
+	//map is my labeled graph
 	public Labeledtime<String, String> map = new Labeledtime<>();
 
 	//variables for the home screen
