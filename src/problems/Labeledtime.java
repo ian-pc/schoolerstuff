@@ -83,7 +83,6 @@ public class Labeledtime<E, T> {
 		ArrayList<Vertex> path = new ArrayList<Vertex>();
 		Vertex cur = end;
 		while (cur != null) {
-			// System.out.println(cur);
 			path.add(cur);
 			cur = leadsTo.get(cur);
 		}
@@ -153,6 +152,7 @@ public class Labeledtime<E, T> {
 
 				if (s.getNeighbor(cur) == end) {
 
+					//stores the infos of backtrace in backtracetempT
 					leadsTo.put(s.getNeighbor(cur), cur);
 					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
 					ArrayList<Vertex> BackTraceTemp = (BackTrace(leadsTo, start, end));
@@ -195,10 +195,12 @@ public class Labeledtime<E, T> {
 
 				templist.put(s, s.label);
 				if (s.getNeighbor(cur) == end) {
+					//uses templistiter to iterate through the hashmap templist which stores the movie and the actor. 
 					templistIter = templist.entrySet().iterator();
 					leadsTo.put(s.getNeighbor(cur), cur);
 					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
 					ArrayList<Vertex> BackTraceTemp = (BackTrace(leadsTo, start, end));
+					//returns the movie and the actor it's connected to. 
 					for (int i = 0; i < BackTraceTemp.size(); i++) {
 						BackTraceTempT.add(new AbstractMap.SimpleEntry(BackTraceTemp.get(i).info, templistIter.next().toString().split("=")[1]));
 					}
@@ -230,6 +232,7 @@ public class Labeledtime<E, T> {
 		leadsTo.put(cur, null);
 
 		//unlike BFS. keeps going until there are no edges to visit and that is the return val
+		//instead of stopping at an end value, it will keep going until there is no vertice to visit (toVisit) 
 		while (toVisit.size() != 0) {
 
 			cur = toVisit.remove(0);
@@ -246,7 +249,7 @@ public class Labeledtime<E, T> {
 	}
 	
 	
-	//finds the furthest distance away from a point
+	//is same as findFurthest but returns the distance away isntead. 
 	public ArrayList<E> findDistAway(int dist, E info) {
 		ArrayList<E> returnVal = new ArrayList<>();
 		
