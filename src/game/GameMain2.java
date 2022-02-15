@@ -53,12 +53,22 @@ public class GameMain2 {
 	private String importStatus = "import";
 	private static ArrayList<Song> songs = new ArrayList<>();
 	private static int songsListYDisplacement = 25;
+	private char[] keyBinds = {'s', 'd', 'f', ' ', 'j', 'k', 'l'};
 	private static Color colors[] = {new Color(248, 249, 250), new Color(233, 236, 239), new Color(222, 226, 230), 
 			new Color(206, 212, 218), new Color(173, 181, 189), new Color(108, 117, 125), new Color(73, 80, 87), 
 			new Color(52, 58, 64), new Color(33, 37, 41)
 	};
+	private int curColorScheme = 0;
+	private String[] curColorSchemeText = {"Gray Scale", "Rainbow"};
+	private Color[][] colorsList = {{new Color(248, 249, 250), new Color(233, 236, 239), new Color(222, 226, 230), 
+		new Color(206, 212, 218), new Color(173, 181, 189), new Color(108, 117, 125), new Color(73, 80, 87), 
+		new Color(52, 58, 64), new Color(33, 37, 41)
+	}, {Color.RED, Color.BLUE, Color.PINK, Color.GREEN, Color.ORANGE, Color.YELLOW, Color.CYAN, Color.MAGENTA, Color.LIGHT_GRAY}};
+	private int SelectingKey = -1;
+	private boolean selectingColorScheme = false;
+	private int keyBindButtonTextHeight;
 	
-	
+	//custom font loader
 	private static Font ModernSans(int style, int size) {
 		Font tempFont = null;
 		try {
@@ -77,6 +87,7 @@ public class GameMain2 {
 
 	}
 	
+	//Rectangle
 	private static void HoveringEffect(Graphics g, int x, int y, int w, int h) {
 		//Ian's code
 		int innerThickness = 10;
@@ -98,6 +109,7 @@ public class GameMain2 {
 		} 
 	}
 	
+	//Circle
 	private static void HoveringEffectC(Graphics g, int x, int y, int w, int h) {
 		//Ian's code
 		int innerThickness = 10;
@@ -141,6 +153,8 @@ public class GameMain2 {
 		Font playButtonFont = ModernSans(Font.PLAIN, 100);
 		Font menuButtonFont = ModernSans(Font.PLAIN, 75);
 		Font backButtonFont = ModernSans(Font.BOLD, 75);
+		Font optionMenuFont = ModernSans(Font.BOLD, 50);
+		Font keyBindsFont = ModernSans(Font.PLAIN, 25);
 		JPanel canvas = new JPanel() {
 			public void paint(Graphics g) {
 				super.paint(g);
@@ -224,12 +238,10 @@ public class GameMain2 {
 					
 					g.setColor(colors[8]);
 					g.fillRect(0, 0, Width, 170);
-					g.fillRect(0, 0, 520, 420);
 					g.fillRect(0, Height-220, Width, 220);
 					
 					g.setColor(colors[2]);
 					g.fillRect(0, 0, Width, 150);
-					g.fillRect(0, 0, 500, 400);
 					g.fillRect(0, Height-200, Width, 200);
 					
 					
@@ -242,10 +254,10 @@ public class GameMain2 {
 							backButtonFont, colors[1]);
 					
 					//c
-					HoveringEffectC(g, 100, 400 + (Height - 400 - 200)/2 - 150, 300, 300);
+					HoveringEffectC(g, 100, 400 + (Height - 400 - 400)/2 - 150, 300, 300);
 					g.setColor(colors[6]);
-					g.fillOval(100, 400 + (Height - 400 - 200)/2 - 150, 300, 300);
-					Text importStatusButtonText = new Text(g, importStatus, 250, 400 + (Height - 400 - 200)/2, 
+					g.fillOval(100, 400 + (Height - 400 - 400)/2 - 150, 300, 300);
+					Text importStatusButtonText = new Text(g, importStatus, 250, 400 + (Height - 400 - 400)/2, 
 							backButtonFont, colors[1]);
 					
 					//c
@@ -253,7 +265,59 @@ public class GameMain2 {
 					
 				} else if (room == "option") {
 					
+					//k
+					Text keyBindSettingText = new Text(g, "Keybinds: ", 100, 75, optionMenuFont, colors[7], true);
+				
+					Text[] keyBindText = new Text[7];
+					for (int i = 0; i < 7; i++) {
+						HoveringEffect(g, 100 + 75 * i + 10 * i, 75 + keyBindSettingText.h + 25, 75, 75);
+						g.setColor(colors[7]);
+						g.fillRect(100 + 75 * i + 10 * i, 75 + keyBindSettingText.h + 25, 75, 75);
+						g.setColor(colors[2]);
+						g.fillRect(100 + 5 + 75 * i + 10 * i, 75 + keyBindSettingText.h + 25 + 5, 65, 65);
+						keyBindText[i] = new Text(g, Character.toString(keyBinds[i]), 100 + 5 + 75 * i + 10 * i + 33, 75 + keyBindSettingText.h + 25 + 5 + 5 + 33, optionMenuFont, colors[7]);
+					}
+					keyBindButtonTextHeight = keyBindSettingText.h;
+					if (SelectingKey != -1) {
+						Text selectingText = new Text(g, "Press a key ", 100 + 5 + 75 * 7 + 10 * 7 + 33 + 200, 75 + keyBindSettingText.h + 25 + 5 + 5 + 33, optionMenuFont, colors[7]);
+					}
 					
+					//k
+					
+					Text windowedSettingText = new Text(g, "Window: ", 100, 375, optionMenuFont, colors[7], true);
+					
+					Text volumeSettingText = new Text(g, "Volume: ", 100, 525, optionMenuFont, colors[7], true);
+					
+					
+					
+					Text colorThemeSettingText = new Text(g, "Color Scheme: ", 100, 225, optionMenuFont, colors[7], true);
+
+					if (!selectingColorScheme) {
+						HoveringEffect(g, 100, 225 + colorThemeSettingText.h + 25, 400, 75);
+					}
+					g.setColor(colors[7]);
+					g.fillRect(100, 225 + colorThemeSettingText.h + 25, 400, 75);
+					g.setColor(colors[2]);
+					g.fillRect(100 + 5, 225 + colorThemeSettingText.h + 25 + 5, 390, 65);
+					String tempText = null;
+					Text ColorTheme = new Text(g, curColorSchemeText[curColorScheme], 100 + 5 + 75, 225 + colorThemeSettingText.h  + 33, optionMenuFont, colors[7], true);
+					if (!selectingColorScheme) {
+						g.fillPolygon(new int[] {100 + 5 + 25, 100 + 5 + 25 + 25, 100 + 5 + 25 + 12}, new int[] {225 + colorThemeSettingText.h + 25 + 30, 225 + colorThemeSettingText.h + 25 + 30, 225 + colorThemeSettingText.h + 25 + 50}, 3);
+					} else {
+						g.fillPolygon(new int[] {100 + 5 + 25, 100 + 5 + 25 + 25, 100 + 5 + 25 + 12}, new int[] {225 + colorThemeSettingText.h + 25 + 50, 225 + colorThemeSettingText.h + 25 + 50, 225 + colorThemeSettingText.h + 25 + 30}, 3);
+					}
+					if (selectingColorScheme) {
+						for (int i = 0; i < colorsList.length; i++) {
+							if (selectingColorScheme) {
+								HoveringEffect(g, 100, 225 + colorThemeSettingText.h + 25 + (i + 1) * 70, 400, 75);
+							}
+							g.setColor(colors[7]);
+							g.fillRect(100, 225 + colorThemeSettingText.h + 25 + (i + 1) * 70, 400, 75);
+							g.setColor(colors[2]);
+							g.fillRect(100 + 5, 225 + colorThemeSettingText.h + 25 + 5 + (i + 1) * 70, 390, 65);
+							Text tempButtonText = new Text(g, curColorSchemeText[i], 100 + 5 + 75, 225 + colorThemeSettingText.h  + 33 + (i + 1)*70, optionMenuFont, colors[7], true);
+						}
+					}
 					
 				}
 				
@@ -296,18 +360,47 @@ public class GameMain2 {
 					
 				} else if (room == "play") {
 					
-					//ba
+					//back
 					if (mouseX > 50 && mouseX < 400 && mouseY > Height - 160 && mouseY < Height - 160 + 125) {
 						room = "main";
 					}
-					//ba
+					//back
 					
 					
 					
 					
 				} else if (room == "option") {
+					for (int i = 0; i < 7; i++) {
+						if (mouseX > 100 + 75 * i + 10 * i  && mouseX < 100 + 75 * i + 10 * i + 75) {
+							if (mouseY > 75 + keyBindButtonTextHeight + 25 && mouseY < 75 + keyBindButtonTextHeight + 25 +75) {
+								if (SelectingKey == -1) {
+									SelectingKey = i;
+								} else {
+									SelectingKey = -1;
+								}
+							}
+						}
+					}
 					
-				}
+					if (mouseX > 100 && mouseX < 100 + 400) {
+						if (mouseY > 225 + keyBindButtonTextHeight + 25 && mouseY < 225 + keyBindButtonTextHeight + 25 + 75) {
+							selectingColorScheme = !selectingColorScheme;
+						}
+					}
+					
+					if (selectingColorScheme) {
+						for (int i = 0; i < colorsList.length; i++) {
+							if (mouseX > 100 + 5 && mouseX < 100 + 5 + 390) {
+								if (mouseY > 225 + keyBindButtonTextHeight + 25 + 5 + (i + 1) * 70 && mouseY < 225 + keyBindButtonTextHeight + 25 + 5 + (i + 1) * 70 + 65 ) {
+									curColorScheme = i;
+									colors = colorsList[i];
+								}
+							}
+							
+						}
+					}
+					
+				} 
 			}
 
 			@Override
@@ -330,6 +423,49 @@ public class GameMain2 {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		canvas.addKeyListener(new KeyListener() {
+
+			/**
+			 * @param e
+			 */
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+				if (room == "main") {
+					
+				} else if (room == "play") {
+					
+				} else if (room == "option") {
+					if (SelectingKey != -1) {
+						for (int i = 0; i < 7; i++) {
+							if (keyBinds[i] == e.getKeyChar()) {
+								keyBinds[i] = keyBinds[SelectingKey];
+								keyBinds[SelectingKey] = e.getKeyChar();
+							}
+						}
+						keyBinds[SelectingKey] = e.getKeyChar();
+						SelectingKey = -1;
+					}
+					
+				}
+				
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
 				// TODO Auto-generated method stub
 				
 			}

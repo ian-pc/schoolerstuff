@@ -28,4 +28,19 @@ public class Text {
 		g.drawString(this.text, this.x, this.y);
 	}
 	
+	public Text (Graphics g, String text, int x, int y, Font f, Color c, boolean a) {
+
+		this.text = text;
+		this.font = f;
+		AffineTransform affinetransform = new AffineTransform();    
+		FontRenderContext frc = new FontRenderContext(affinetransform,true,true);  
+		this.h = (int)(font.getStringBounds(text, frc).getHeight());
+		this.x = x;
+		this.y = y + this.h;
+		this.color = c;
+		g.setColor(this.color);
+		g.setFont(this.font);
+		g.drawString(this.text, this.x, this.y);
+	}
+	
 }
