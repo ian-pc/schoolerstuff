@@ -216,7 +216,6 @@ public class KevinBacon {
 		zenEnterButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				//if actors not valid or BFS = null then write error message
 				//if both actors present -> find BFS and print
 				if (!actorsString.contains(zenStartActorField.getText())) {
@@ -226,8 +225,6 @@ public class KevinBacon {
 				} else {
 					ArrayList<AbstractMap.SimpleEntry<String, String>> zenBFSPath;
 					zenBFSPath = map.moviesBFS(zenStartActorField.getText(), zenEndActorField.getText());
-					
-					String output;
 					
 					if ((zenBFSPath == null)) {
 						zenResultLabel.setText("there is no path between the two actors, Kevin Bacon is sad :(");
@@ -401,7 +398,6 @@ public class KevinBacon {
 	public void readMovie(String fileloc) throws IOException {
 		FileReader fr = new FileReader(fileloc);
 		BufferedReader sc = new BufferedReader(fr);
-		HashMap<Integer, String> tempMap = new HashMap<>();
 		String line;
 		while ((line = sc.readLine()) != null) {
 			String[] temp = line.split("~");
@@ -438,7 +434,6 @@ public class KevinBacon {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
 		new KevinBacon();
 		// map.moviesBFS("Jackie Chan", "Jon Cook");
 	}
