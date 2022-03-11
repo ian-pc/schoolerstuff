@@ -33,7 +33,8 @@ public class Text {
 		this.text = text;
 		this.font = f;
 		AffineTransform affinetransform = new AffineTransform();    
-		FontRenderContext frc = new FontRenderContext(affinetransform,true,true);  
+		FontRenderContext frc = new FontRenderContext(affinetransform,true,true); 
+		this.w = (int)(font.getStringBounds(text, frc).getWidth()); 
 		this.h = (int)(font.getStringBounds(text, frc).getHeight());
 		this.x = x;
 		this.y = y + this.h;

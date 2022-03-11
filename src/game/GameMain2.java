@@ -14,6 +14,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.awt.font.FontRenderContext;
@@ -26,10 +27,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.sql.Time;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -75,6 +78,25 @@ public class GameMain2 {
 	private int curSongRows = 4, curSongDifficulty = 5;
 	private String curSongName = "";
 	private boolean writingCurSongName = false;
+	private int curSongNameOpacity = 100;
+	private Song playingSong = null;
+	private int playingSongScore = 0;
+	private int playingSongNotesPlayed = 1;
+	private int curFrame = 0;
+	private Stack<Note> notesOnScreen = new Stack<>();
+	private long elapsedTime;
+	private int timeToReachLine;
+	private boolean paused = false;
+	long pausedTime;
+	
+	private class Note {
+		public int row;
+		public int yDisplacement = 0;
+
+		public Note(int row) {
+			this.row = row;
+		}
+	}
 
 	// custom font loader
 	private static Font ModernSans(int style, int size) {
@@ -143,31 +165,29 @@ public class GameMain2 {
 		}
 	}
 
-	public int[] GetAudioGraph(String fileLoc) throws IOException, UnsupportedAudioFileException {
-		int a[] = new int[10000000];
-//		 SoundPlayer player = new SoundPlayer("Hot-Milk.wav");
-//		 InputStream stream = new ByteArrayInputStream(player.getSamples());
-//		 player.play(stream);
-		AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File(fileLoc));
+	int rowsAlpha[] = new int[7];
 
-		int numBytes = inputStream.available();
-		byte[] buffer = new byte[numBytes];
-		inputStream.read(buffer, 0, numBytes);
+	private void clickEffect(Graphics g) {
+		for (int i = 0; i < rowsAlpha.length; i++) {
+			// System.out.println(rowsAlpha[i]);
+			if (rowsAlpha[i] > 0) {
+				g.setColor(new Color(colors[5].getRed(), colors[5].getGreen(), colors[5].getBlue(), rowsAlpha[i]));
 
-//		BufferedWriter fileOut = new BufferedWriter(new FileWriter(new File("bytes.txt")));
-
-		ByteBuffer bb = ByteBuffer.wrap(buffer);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
-		int i = 0;
-		while (bb.remaining() > 1) {
-			short current = bb.getShort();
-//			 fileOut.write(String.valueOf(current));
-//			 fileOut.newLine();
-			a[i] = current;
-			System.out.println(a[i]);
-			i++;
+				g.fillRect(Width / 2 + i * (Width / 2 - 200) / playingSong.rows - 5, Height - 200 - 10,
+						(Width / 2 - 200) / playingSong.rows + 5, 23);
+				rowsAlpha[i] -= 5;
+			}
 		}
-		return a;
+	}
+
+	private Clip clip;
+
+	private void playSong(String filename) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+		File file = new File(filename);
+		AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+		clip = AudioSystem.getClip();
+		clip.open(audioStream);
+		clip.start();
 	}
 
 	public GameMain2() {
@@ -195,6 +215,7 @@ public class GameMain2 {
 		Font keyBindsFont = ModernSans(Font.PLAIN, 25);
 		Font playMenuFont = ModernSans(Font.BOLD, 30);
 		Font playMenuFont2 = ModernSans(Font.PLAIN, 50);
+		Font resultGradeFont = ModernSans(Font.BOLD, 400);
 		JPanel canvas = new JPanel() {
 			public void paint(Graphics g) {
 				super.paint(g);
@@ -313,14 +334,20 @@ public class GameMain2 {
 								true);
 						Text curSongDifficultyText = new Text(g, "Difficulty: ", 425, Height / 2 + 50 - 50,
 								playMenuFont, colors[6], true);
-						Text curSongNameText = new Text(g, "Name: ", 425, Height / 2 + 200 - 100,
-								playMenuFont, colors[6], true);
+						Text curSongNameText = new Text(g, "Name: ", 425, Height / 2 + 200 - 100, playMenuFont,
+								colors[6], true);
 						g.fillRoundRect(425 + (320 / 7) * curSongRows, Height / 2 - 60, 10, 30, 5, 5);
 						g.fillRoundRect(425 + (320 / 10) * curSongDifficulty, Height / 2 + 40, 10, 30, 5, 5);
-						Text curSongNameText2 = new Text(g, curSongName, 425, Height / 2 + 200 - 60,
-								playMenuFont2, colors[6], true);
-						
+						Text curSongNameText2 = new Text(g, curSongName, 425, Height / 2 + 200 - 60, playMenuFont2,
+								colors[6], true);
 
+						if (writingCurSongName == true) {
+							curSongNameOpacity -= ((curSongNameOpacity > 50) ? 1 : curSongNameOpacity - 255);
+							g.setColor(new Color(colors[5].getRed(), colors[5].getGreen(), colors[5].getBlue(),
+									curSongNameOpacity));
+							g.fillRect(425 + (int) (curSongNameText2.w * 1.02), Height / 2 + 203 - 60, 3,
+									curSongNameText2.h);
+						}
 					}
 
 				} else if (room == "option") {
@@ -375,8 +402,6 @@ public class GameMain2 {
 					g.fillRect(100 + 5 + 5 + windowedButtonXDisplacement, 375 + windowedSettingText.h + 25 + 5 + 5, 55,
 							55);
 
-					Text volumeSettingText = new Text(g, "Volume: ", 100, 525, optionMenuFont, colors[7], true);
-
 					Text colorThemeSettingText = new Text(g, "Color Scheme: ", 100, 225, optionMenuFont, colors[7],
 							true);
 
@@ -417,6 +442,66 @@ public class GameMain2 {
 						}
 					}
 
+				} else if (room == "game") {
+					
+					long startTime = System.nanoTime();
+					
+					if (clip.getFramePosition() / 10000 == playingSong.song.length) {
+						room = "play";
+						curFrame = 0;
+						notesOnScreen = new Stack<>();
+					}
+
+					curFrame = (int) (clip.getMicrosecondPosition() / 10000);
+
+					g.setColor(colors[2]);
+					g.fillRect(0, 0, Width, Height);
+
+					g.setColor(colors[7]);
+					g.fillRect(Width / 2, Height - 200, Width / 2 - 200, 3);
+
+					Text playingSongName = new Text(g, playingSong.name, 100, 50, optionMenuFont, colors[7]);
+					Text playingSongScoreT = new Text(g, "Score: " + playingSongScore, 100, 200, optionMenuFont,
+							colors[7]);
+
+					// System.out.println(curFrame/100);
+					if (playingSong.song[(int) (((curFrame - timeToReachLine) > 0) ? (curFrame - timeToReachLine - 1) : 0)] != -1) {
+						notesOnScreen.push(new Note(playingSong.song[(int) (((curFrame - timeToReachLine) > 0) ? (curFrame - timeToReachLine - 1) : 0)/*curFrame*/]));
+					}
+					for (int i = 0; i < notesOnScreen.size(); i++) {
+						notesOnScreen.get(i).yDisplacement += 2;
+						g.setColor(colors[6]);
+						g.fillRect(Width / 2 + notesOnScreen.get(i).row * (Width / 2 - 200) / playingSong.rows,
+								notesOnScreen.get(i).yDisplacement, (Width / 2 - 200) / playingSong.rows, 5);
+					}
+
+					clickEffect(g);
+					elapsedTime = (System.nanoTime() - startTime) / 10000000;
+					timeToReachLine = (int) (elapsedTime * (Height - 200)/5);
+					
+					if (notesOnScreen.size() > 0) {
+						if (notesOnScreen.firstElement().yDisplacement > Height - 200 + 75) {
+							notesOnScreen.pop();
+						}
+					}
+					
+				} else if (room == "result") {
+					
+					String grade;
+					if (playingSongScore/playingSongNotesPlayed > 0.98) {
+						grade = "S";
+					} else if (playingSongScore/playingSongNotesPlayed > 0.90) {
+						grade = "A";
+					} else if (playingSongScore/playingSongNotesPlayed > 0.80) {
+						grade = "B";
+					} else if (playingSongScore/playingSongNotesPlayed > 0.75) {
+						grade = "C";
+					} else {
+						grade = "D";
+					}
+					
+					Text resultGradeText = new Text(g, grade, Width/2 + 100,
+							Height/2, resultGradeFont, colors[6]);
 				}
 
 			}
@@ -464,6 +549,26 @@ public class GameMain2 {
 					}
 					// back
 
+					// play
+
+					if (mouseX > Width / 2 && mouseX < Width / 2 + Width / 2 - 100) {
+						for (int i = 0; i < songs.size(); i++) {
+							if (mouseY > 50 + 120 * i + songsListYDisplacement + 170
+									&& mouseY < 50 + 120 * i + songsListYDisplacement + 170 + 100) {
+								room = "game";
+								try {
+									playSong(songs.get(i).loc);
+								} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+								playingSong = songs.get(i);
+							}
+						}
+					}
+
+					// play
+
 					// import
 					if (mouseX > 100 && mouseX < 100 + 300 && mouseY > 400 + (Height - 400 - 400) / 2 - 150
 							&& mouseY < 400 + (Height - 400 - 400) / 2 - 150 + 300) {
@@ -475,30 +580,38 @@ public class GameMain2 {
 							if (result == JFileChooser.APPROVE_OPTION) {
 								selectedFile = j.getSelectedFile();
 								// System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-								curSongName = selectedFile.getName().replace(".wav", "").replace(".m4a", "");
+								curSongName = selectedFile.getName().replace(".wav", "");
 								makingSong = true;
 							}
 						} else if (makingSong == true) {
 							makingSong = false;
 							try {
 								songs.add(
-										new Song(curSongRows, curSongDifficulty, curSongName, selectedFile.getName()));
+										new Song(curSongDifficulty, curSongRows, curSongName, selectedFile.getAbsolutePath()));
 							} catch (IOException | UnsupportedAudioFileException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						}
-						
+
 					}
-					
-					if (makingSong == true) { 
+
+					if (makingSong == true) {
 						if (mouseX > 425 && mouseX < 425 + 300) {
-							if (mouseY > Height/2 + 200 - 80 && mouseY < Height +200) {
+							if (mouseY > Height / 2 + 200 - 80 && mouseY < Height + 200) {
 								writingCurSongName = true;
-								System.out.println("ye");
+
 							}
 						}
+
+						if (mouseX < 425 || mouseX > 425 + 300) {
+							writingCurSongName = false;
+						}
+						if (mouseY < Height / 2 + 200 - 80 || mouseY > Height + 200) {
+							writingCurSongName = false;
+						}
 					}
+
 					// import
 
 				} else if (room == "option") {
@@ -584,7 +697,7 @@ public class GameMain2 {
 								curSongRows = Math.round((mouseX - 425) / (320 / 7));
 							}
 							if (mouseY > Height / 2 + 45 && mouseY < Height / 2 + 45 + 35) {
-								curSongDifficulty = Math.round((mouseX - 425) / (320 / 7));
+								curSongDifficulty = Math.round((mouseX - 425) / (320 / 9));
 							}
 						}
 					}
@@ -625,18 +738,7 @@ public class GameMain2 {
 				if (room == "main") {
 
 				} else if (room == "play") {
-					if (makingSong == true) {
-						if (writingCurSongName == true) {
-							if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-								curSongName = curSongName.substring(0, curSongName.length() - 1);
-								System.out.println("YE");
-							} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_ENTER) {
-								writingCurSongName = false;
-							} else {
-								
-							}
-						}
-					}
+
 				} else if (room == "option") {
 					if (SelectingKey != -1) {
 						for (int i = 0; i < 7; i++) {
@@ -656,7 +758,159 @@ public class GameMain2 {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
+				if (room == "play") {
+					if (makingSong == true) {
+						if (writingCurSongName == true) {
+							if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+								if (curSongName.length() > 0) {
+									curSongName = curSongName.substring(0, curSongName.length() - 1);
+								}
+							} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_ENTER) {
+								writingCurSongName = false;
+							} else {
+								curSongName += e.getKeyChar();
+							}
+						}
+					}
+				} else if (room == "game") {
+					char keysRows[] = new char[playingSong.rows];
+					
+					if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						paused = !paused;
+					}
+					
+					if (playingSong.rows == 1) {
+						keysRows[0] = keyBinds[3];
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[0] = 255;
+						}
+					} else if (playingSong.rows == 2) {
 
+						keysRows[0] = keyBinds[2];
+						keysRows[1] = keyBinds[4];
+						
+						if (e.getKeyChar() == keyBinds[2]) {
+							rowsAlpha[0] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[1] = 255;
+						}
+					} else if (playingSong.rows == 3) {
+
+						keysRows[0] = keyBinds[2];
+						keysRows[1] = keyBinds[3];
+						keysRows[2] = keyBinds[4];
+						if (e.getKeyChar() == keyBinds[2]) {
+							rowsAlpha[0] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[3]) {
+							rowsAlpha[1] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[2] = 255;
+						}
+					} else if (playingSong.rows == 4) {
+						keysRows[0] = keyBinds[1];
+						keysRows[1] = keyBinds[2];
+						keysRows[2] = keyBinds[4];
+						keysRows[3] = keyBinds[5];
+						System.out.println(keysRows[3]);
+						if (e.getKeyChar() == keyBinds[1]) {
+							rowsAlpha[0] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[2]) {
+							rowsAlpha[1] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[2] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[5]) {
+							rowsAlpha[3] = 255;
+						}
+					} else if (playingSong.rows == 5) {
+						keysRows[0] = keyBinds[2];
+						keysRows[1] = keyBinds[3];
+						keysRows[2] = keyBinds[4];
+						keysRows[3] = keyBinds[5];
+						keysRows[4] = keyBinds[6];
+						if (e.getKeyChar() == keyBinds[2]) {
+							rowsAlpha[0] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[3]) {
+							rowsAlpha[1] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[2] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[5]) {
+							rowsAlpha[3] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[6]) {
+							rowsAlpha[4] = 255;
+						}
+					} else if (playingSong.rows == 6) {
+						keysRows[0] = keyBinds[0];
+						keysRows[1] = keyBinds[1];
+						keysRows[2] = keyBinds[2];
+						keysRows[3] = keyBinds[4];
+						keysRows[4] = keyBinds[5];
+						keysRows[5] = keyBinds[6];
+						if (e.getKeyChar() == keyBinds[0]) {
+							rowsAlpha[0] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[1]) {
+							rowsAlpha[1] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[2]) {
+							rowsAlpha[2] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[3] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[5]) {
+							rowsAlpha[4] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[6]) {
+							rowsAlpha[5] = 255;
+						}
+					} else if (playingSong.rows == 7) {
+						keysRows[0] = keyBinds[0];
+						keysRows[1] = keyBinds[1];
+						keysRows[2] = keyBinds[2];
+						keysRows[3] = keyBinds[3];
+						keysRows[4] = keyBinds[4];
+						keysRows[5] = keyBinds[5];
+						keysRows[6] = keyBinds[6];
+						if (e.getKeyChar() == keyBinds[0]) {
+							rowsAlpha[0] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[1]) {
+							rowsAlpha[1] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[2]) {
+							rowsAlpha[2] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[3]) {
+							rowsAlpha[3] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[4]) {
+							rowsAlpha[4] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[5]) {
+							rowsAlpha[5] = 255;
+						}
+						if (e.getKeyChar() == keyBinds[6]) {
+							rowsAlpha[6] = 255;
+						}
+					}
+					
+					if (notesOnScreen.size() > 0) {
+						if (keysRows[notesOnScreen.firstElement().row] == e.getKeyChar()) {
+							System.out.println(notesOnScreen.pop());
+						}
+					}
+					
+				}
 			}
 
 			@Override
@@ -707,9 +961,7 @@ public class GameMain2 {
 				// TODO Auto-generated method stub
 				if (room == "play") {
 					songsListYDisplacement += 10 * e.getWheelRotation() * e.getScrollAmount();
-					if (songsListYDisplacement < 0) {
-						songsListYDisplacement = 0;
-					}
+
 				}
 			}
 		});
@@ -731,7 +983,7 @@ public class GameMain2 {
 	public static void main(String[] args) throws UnsupportedAudioFileException, IOException {
 		// TODO Auto-generated method stub
 
-		songs.add(new Song(5, 4, "test", "Files/Hot-Milk.wav"));
+		songs.add(new Song(9, 4, "test", "Files/Hot-Milk.wav"));
 		new GameMain2();
 
 	}

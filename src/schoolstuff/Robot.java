@@ -55,6 +55,9 @@ public int robotX = Height/2 - 50, robotY = Width/2;
 				} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 					robotX -= 10;
 				}
+				if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					System.out.println("YE");
+				}
 			}
 
 			@Override
