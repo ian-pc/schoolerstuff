@@ -4,29 +4,29 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class PriorityQueue<E> {
+public class PriorityQueueDT<E> {
 	
 	private class Node {
 		E value;
-		int priority;
+		double priority;
 		
-		public Node(E value, int priority) {
+		public Node(E value, double priority) {
 			this.value = value;
 			this.priority = priority;
 		}
 		
-		public int getprior() {
+		public double getprior() {
 			return this.priority;
 		}
 	}
 	
 	private ArrayList<Node> pqueue = new ArrayList<Node>();
 	
-	public int getFirstPrior() {
+	public double getFirstPrior() {
 		return pqueue.get(0).getprior();
 	}
 	
-	public int get(E value) { //gets the value and return's it's priority
+	public double get(E value) { //gets the value and return's it's priority
 		int location = 0;
 		while (true) {
 			if (pqueue.get(location) == value) {
@@ -52,7 +52,7 @@ public class PriorityQueue<E> {
 		return string;
 	}
 	
-	public void add(E value, int priority) {
+	public void put(E value, double priority) {
 		pqueue.add(new Node(value, priority));
 		pqueue.sort(Comparator.comparingDouble(Node::getprior));
 	}

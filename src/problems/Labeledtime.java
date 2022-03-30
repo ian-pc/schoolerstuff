@@ -227,8 +227,8 @@ public class Labeledtime<E, T> {
 		Vertex start = vertices.get(info);
 		Vertex cur = start;
 
-		PriorityQueue<Vertex> toVisit = new PriorityQueue<>();
-		toVisit.put(cur);
+		List<Vertex> toVisit = new ArrayList<>();
+		toVisit.add(cur);
 		leadsTo.put(cur, null);
 
 		//unlike BFS. keeps going until there are no edges to visit and that is the return val

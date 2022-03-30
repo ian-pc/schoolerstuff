@@ -1,141 +1,154 @@
 package problems;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Set;
 
-import problems.Graphtime.Vertex;
 
 public class Distancetime<E> {
-	
-	HashMap<E, Vertex> vertices;
 
-	//creates a new hashmap called vertices
-	public Distancetime() {
-		vertices = new HashMap<E, Vertex>();
-	}
+	private HashMap<E, Vertex> vertices = new HashMap<>();
 
-	//creates a new vertice and adds it to the hashmap
-	public void addVertex(E info) {
-		vertices.put(info, new Vertex(info));
-	}
+	public class Vertex {
 
-	//creates an edge and connects the variables to eachother
-	public void connect(E info1, E info2, Double label) {
-		Vertex v1 = vertices.get(info1);
-		Vertex v2 = vertices.get(info2);
-		
-		if (v1 == null || v2 == null) {
-			System.out.println("Vertex " + (v1 == null ? v1 : v2).info + " not found");
-			return;
-		} else {
-			Edge e = new Edge(label, v1, v2);
+		public E info;
+		public HashMap<Vertex, Double> neighbors = new HashMap<>();
 
-			v1.edges.add(e);
-			v2.edges.add(e); 
-		}
-	}
-
-	//.toString()
-	public String toString(Vertex v) {
-		return (String) v.info;
-	}
-	
-	//a datatype which represents a relationship between vertices with a name (label)
-	private class Edge {
-		Double label;
-		Vertex v1, v2;
-
-		public Edge(Double label, Vertex v1, Vertex v2) {
-			this.label = label;
-			this.v1 = v1;
-			this.v2 = v2;
-		}
-
-		//gets the neighbor of a vertice of an edge 
-		public Vertex getNeighbor(Vertex v) {
-			if (v.info.equals(v1.info)) {
-				return v2;
-			}
-			return v1;
-		}
-
-	}
-
-	//datatype of a vertex
-	private class Vertex {
-		E info;
-		HashSet<Edge> edges;
-		
 		public Vertex(E info) {
 			this.info = info;
-			edges = new HashSet<Edge>();
+		}
+
+		public String neighborsToString() {
+			String returnVal = "";
+			for (Vertex s : this.neighbors.keySet()) {
+				returnVal += s.info;
+			}
+			return returnVal;
+		}
+
+	}
+
+	public void add(E info) {
+		if (vertices.containsKey(info) == false || vertices.size() == 0) {
+			vertices.put(info, new Vertex(info));
+		} else {
+			vertices.get(info).info = info;
 		}
 	}
 
+	public Vertex get(E info) {
+
+		return vertices.get(info);
+
+	}
+
+	public void connect(E v1, E v2, double distance) {
+//		System.out.println(vertices.get(v2));
+		vertices.get(v1).neighbors.put(vertices.get(v2), distance);
+		vertices.get(v2).neighbors.put(vertices.get(v1), distance);
+	}
 	
-	//returns the path in the form of an ArrayList of start to end vertices given a hashmap of leading
+	public void remove(E info) {
+		for (Vertex s : vertices.get(info).neighbors.keySet()) {
+			s.neighbors.remove(vertices.get(info));
+		}
+		vertices.remove(info);
+	}
+
+	public String toString(Vertex s) {
+
+		return (String) s.info;
+
+	}
+
+	public int size() {
+
+		return vertices.size();
+
+	}
+
 	public ArrayList<Vertex> BackTrace(HashMap<Vertex, Vertex> leadsTo, Vertex start, Vertex end) {
 		ArrayList<Vertex> path = new ArrayList<Vertex>();
 		Vertex cur = end;
 		while (cur != null) {
+			// System.out.println(cur);
 			path.add(cur);
 			cur = leadsTo.get(cur);
 		}
 		return path;
 	}
-	
-	public ArrayList<Vertex> DijktrasP(E startinfo, E endinfo) {
 
-		//a hashmap with each key being a vertex which connects to it's value that is also a vertex
+	public ArrayList<Vertex> djiaktras(E startinfo, E endinfo) {
+
+		HashMap<Vertex, Double> distances = new HashMap<>();
+		HashMap<Vertex, Boolean> visited = new HashMap<>();
 		HashMap<Vertex, Vertex> leadsTo = new HashMap<>();
 		ArrayList<Vertex> path = new ArrayList<>();
 
+		for (Vertex temp : vertices.values()) {
+			distances.put(temp, Double.MAX_VALUE);
+			visited.put(temp, false);
+		}
+		
 		Vertex start = vertices.get(startinfo);
 		Vertex end = vertices.get(endinfo);
+		// System.out.println(end.info);
 		Vertex cur = start;
+		
+		distances.replace(start, 0.0);
 
-		//a list of vertices on the current layer of the graph
-		List<Vertex> toVisit = new ArrayList<>();
-		toVisit.add(cur);
+		PriorityQueueDT<Vertex> toVisit = new PriorityQueueDT<>();
+		toVisit.put(cur, distances.get(cur));
 
+		// path.add(cur);
 		leadsTo.put(cur, null);
 
 		while (toVisit.size() != 0) {
-
-			cur = toVisit.remove(0);
-			for (Edge s : cur.edges) {
-				//if the current edge contains the end vertex, return it's backtrace. 
-				if (s.getNeighbor(cur) == end) {
-
-					leadsTo.put(s.getNeighbor(cur), cur);
-					ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
-					return (BackTrace(leadsTo, start, end));
-
+			//System.out.println(cur.info);
+			cur = toVisit.pop();
+			visited.put(cur, true);
+			
+			if (cur.info == endinfo) {
+				ArrayList<Vertex> temp = BackTrace(leadsTo, start, end);
+				System.out.println(distances.get(cur));
+				for (int i = 0; i < temp.size(); i++) {
+					System.out.println(temp.get(i).info);
 				}
-				//otherwise, go down a deeper layer and add another variable to leadsTo
-				if (leadsTo.containsKey(s.getNeighbor(cur)) == false) {
-					toVisit.add(s.getNeighbor(cur));
-					leadsTo.put(s.getNeighbor(cur), cur);
+				return (BackTrace(leadsTo, start, end));
+			}
+			
+			for (Vertex temp : cur.neighbors.keySet()) {
+				if (visited.get(temp) == true) continue;
+				
+				double tempdist = distances.get(cur) + cur.neighbors.get(temp);
+				//System.out.println(tempdist);
+				if (tempdist < distances.get(temp)) {
+					distances.replace(temp, tempdist);
+					toVisit.put(temp, distances.get(temp));
+					leadsTo.put(cur, temp);
 				}
 			}
+
 		}
 		return path;
 	}
-	
+
 	public static void main(String[] args) {
+		// TODO Auto-generated method stub
 		Distancetime<String> DT = new Distancetime<>();
-		DT.addVertex("H");
-		DT.addVertex("I");
-		DT.addVertex("E");
-		DT.addVertex("P");
+		DT.add("H");
+		DT.add("I");
+		DT.add("E");
+		DT.add("C");
+		DT.add("P");
 		DT.connect("H", "I", 1.0);
 		DT.connect("H", "E", 5.0);
 		DT.connect("I", "C", 2.0);
 		DT.connect("C", "E", 1.0);
+		DT.connect("H", "C", 4.0);
+		DT.djiaktras("H", "C");
 	}
+
 }
