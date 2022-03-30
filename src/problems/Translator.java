@@ -1,4 +1,4 @@
- package schoolstuff;
+ package problems;
 
 import java.io.FileReader;
 import java.io.IOException;

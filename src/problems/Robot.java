@@ -1,4 +1,4 @@
-package schoolstuff;
+package problems;
 
 import java.awt.Color;
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package schoolstuff;
+package problems;
 import java.io.*;
 
 // BufferedBitReader by Mr. David

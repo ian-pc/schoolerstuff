@@ -1,4 +1,4 @@
-package schoolstuff;
+package problems;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -53,23 +53,6 @@ public class PriorityQueue<E> {
 	}
 	
 	public void add(E value, int priority) {
-//		int location = (int) pqueue.size()/2;
-//		if (pqueue.size() % 2 == 1) {
-//			if (pqueue.get(pqueue.size()).priority == priority) {
-//				pqueue.add(new Node(value, priority));
-//			} else pqueue.remove(pqueue.size());
-//		}
-//		while (true) {
-//			if (pqueue.get(location).priority == priority) {
-//				pqueue.add(new Node(value, priority));
-//				break;
-//			} else if (pqueue.get(location).priority > priority) {
-//				location /=2;	
-//			} else {
-//				location += location/2;
-//			}
-//		}
-		
 		pqueue.add(new Node(value, priority));
 		pqueue.sort(Comparator.comparingInt(Node::getprior));
 	}

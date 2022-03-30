@@ -1,4 +1,4 @@
-package schoolstuff;
+package problems;
 
 public class QandA {
 

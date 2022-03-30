@@ -1,4 +1,4 @@
-package schoolstuff;
+package problems;
 
 import java.awt.*;  
 import java.awt.event.*;  
