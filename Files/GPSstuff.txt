@@ -1,0 +1,20 @@
+414 195 Anarchy-Acres Tilted-Towers 258
+283 703 Flush-Factory Tilted-Towers 277
+531 284 Tomato-Town Tilted-Towers 273
+447 508 Salty-Springs Tilted-Towers 170
+703 356 Lonely-Lodge Tilted-Towers 411
+343 325 Loot-Lake Tilted-Towers 110
+599 450 Retail-Row Tilted-Towers 302
+187 512 Greasy-Grove Tilted-Towers 139
+483 421 Dusty-Depot Tilted-Towers 186
+225 264 Pleasant-Park Tilted-Towers 177
+455 735 Lucky-Landings Tilted-Towers 347
+297 426 Tilted-Towers Tomato-Town 273 Dusty-Depot 186 Greasy-Grove 139 Moisty-Mire 410 Wailing-Woods 376 Pleasant-Park 177 Lucky-Landings 347 Lonely-Lodge 411 Risky-Reels 372 Fatal-Field 270 Shifty-Shafts 94 Snobby-Shores 228 Haunted-Hills 270 Retail-Row 302 Loot-Lake 110 Anarchy-Acres 258 Salty-Springs 170 Junk-Junction 329 Flush-Factory 277
+71 394 Snobby-Shores Tilted-Towers 228
+125 217 Haunted-Hills Tilted-Towers 270
+585 189 Risky-Reels Tilted-Towers 372
+486 620 Fatal-Field Tilted-Towers 270
+638 266 Wailing-Woods Tilted-Towers 376
+646 643 Moisty-Mire Tilted-Towers 410
+294 520 Shifty-Shafts Tilted-Towers 94
+169 122 Junk-Junction Tilted-Towers 329

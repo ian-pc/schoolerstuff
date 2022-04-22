@@ -1,4 +1,4 @@
-package problems;
+package GPSstue;
 
 import java.util.ArrayList;
 import java.util.Comparator;
