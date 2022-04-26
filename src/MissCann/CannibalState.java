@@ -45,6 +45,10 @@ public class CannibalState {
 				&& temp.cRight == cRight);
 	}
 
+	public String toString() {
+		return mLeft + " " + mRight + " " + cLeft + " " + cRight + " " + boat;
+	}
+	
 	public HashSet<CannibalState> nextState() {
 
 		HashSet<CannibalState> returnVal = new HashSet<>();
