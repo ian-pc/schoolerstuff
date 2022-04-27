@@ -144,10 +144,11 @@ public class DistancetimeGPS {
 			tempA.add(leadsTo.get(tempA.get(tempA.size() - 1)));
 		}
 		// traverses backwards through the leads to hashmap
-
+		tempA.remove(tempA.size() - 1);
+		tempA.add(end);
 		return tempA;
 	}
-
+	
 	public ArrayList<Vertex> djiaktras(Location startinfo, Location endinfo) {
 
 		HashMap<Vertex, Double> distances = new HashMap<>();
