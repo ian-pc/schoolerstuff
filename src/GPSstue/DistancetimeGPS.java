@@ -146,6 +146,7 @@ public class DistancetimeGPS {
 		// traverses backwards through the leads to hashmap
 		tempA.remove(tempA.size() - 1);
 		tempA.add(end);
+		//fixing a bug where the last value is not equal to the end value. 
 		return tempA;
 	}
 	
