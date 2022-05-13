@@ -2,21 +2,20 @@ package MissCann;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
-
 public class Haoi {
-	public Stack<Integer>[] haois; //an array of towers
+	public Stack<Integer>[] haois; // an array of towers
 	public int numTowers, numRings;
-	
-	
+
 	public Haoi(int numRings, int numTowers, Stack<Integer>[] haois) {
 		this.numTowers = numTowers;
 		this.numRings = numRings;
 //		this.haois = (Stack<Integer>[]) new Stack[numTowers];
 		this.haois = haois;
 	}
-	
+
 	public String toString() {
 		String returnVal = "";
 		for (int i = 0; i < haois.length; i++) {
@@ -27,37 +26,35 @@ public class Haoi {
 		}
 		return returnVal;
 	}
-	
+
 	public Boolean isLegal() {
-		for (int i = 0; i < haois.length - 1; i++) {
-			int prev = haois[i].get(haois[i].size() - 1);
-			for (int j = 0; j < haois[i].size(); j++) {
-				System.out.println(haois[i].get(j));
-				if (haois[i].get(j) > prev) return false;
-				prev = haois[i].get(j);
+		for (int i = 0; i < haois.length; i++) {
+			for (int j = 1; j < haois[i].size(); j++) {
+				if (haois[i].get(j) > haois[i].get(j - 1))
+					return false;
 			}
 		}
+
 		return true;
 	}
 
 	public boolean equals(Object c) {
-		 Haoi tempH = (Haoi) c;
-		 return (this == tempH);
+		Haoi tempH = (Haoi) c;
+		return (this.haois.equals(tempH.haois));
 	}
-	
-	public HashSet<Haoi> nextState() {
+
+	public Set<Haoi> nextState() {
 		HashSet<Haoi> returnVal = new HashSet<>();
 		
 		for (int i = 0; i < haois.length - 1; i++) {
 			if (haois[i].size() == 0) continue;
-			for (int j = 0; j < haois.length - 1; j++) {
+			for (int j = 0; j < haois.length; j++) {
 				if (j == i) continue;
 				Stack<Integer>[] tempH = haois;
+				System.out.println(i + " " + tempH[i].get(tempH[i].size() - 1));
 				tempH[j].add(tempH[i].pop());
 				Haoi tempH2 = new Haoi(numRings, numTowers, tempH);
-				System.out.println(tempH2.isLegal());
 				if (tempH2.isLegal()) returnVal.add(tempH2);
-//				returnVal.add(tempH2);
 			}
 		}
 		
@@ -65,24 +62,21 @@ public class Haoi {
 	}
 
 	public Boolean isSolved() {
-		return (haois[numTowers - 1].size() == numRings);
+		return (haois[haois.length - 1].size() == numRings);
 	}
-	
+
 	public ArrayList<Haoi> solve(int depth, HashSet<Haoi> previous, ArrayList<Haoi> soln) {
-		
-		
+
 		if (this.isSolved() == true) {
 			soln.add(this);
 			return soln;
 		}
-		
+
 		if (depth > 1000) {
 			return null;
 		}
 
-		System.out.println(this.nextState() + "k");
 		for (Haoi tempCS : this.nextState()) {
-			System.out.println(tempCS + "j");
 			if (!previous.contains(tempCS)) {
 				previous.add(tempCS);
 				ArrayList<Haoi> x = tempCS.solve(depth + 1, previous, soln);
@@ -92,10 +86,9 @@ public class Haoi {
 				}
 			}
 		}
-		
 		return null;
 	}
-	
+
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException {
 		// TODO Auto-generated method stub
 		int numTowersTemp = 3;
@@ -109,10 +102,11 @@ public class Haoi {
 		temp[0].add(2);
 		temp[0].add(1);
 		Haoi tempH = new Haoi(numRingsTemp, numTowersTemp, temp);
-		
+//		Haoi tempH2 = new Haoi(numRingsTemp, numTowersTemp, temp);
+//		System.out.println(tempH.equals(tempH2));
 		HashSet<Haoi> tempHS = new HashSet<>();
 		tempHS.add(tempH);
 		System.out.println(tempH.solve(0, tempHS, new ArrayList<Haoi>()));
-		
+
 	}
 }
