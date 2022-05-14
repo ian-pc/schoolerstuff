@@ -12,7 +12,6 @@ public class Haoi {
 	public Haoi(int numRings, int numTowers, Stack<Integer>[] haois) {
 		this.numTowers = numTowers;
 		this.numRings = numRings;
-//		this.haois = (Stack<Integer>[]) new Stack[numTowers];
 		this.haois = haois;
 	}
 
@@ -47,14 +46,17 @@ public class Haoi {
 		HashSet<Haoi> returnVal = new HashSet<>();
 		
 		for (int i = 0; i < haois.length - 1; i++) {
-			if (haois[i].size() == 0) continue;
+			if (haois[i].isEmpty()) continue;
 			for (int j = 0; j < haois.length; j++) {
 				if (j == i) continue;
+				if (haois[i].isEmpty()) continue;
 				Stack<Integer>[] tempH = haois;
-				System.out.println(i + " " + tempH[i].get(tempH[i].size() - 1));
+				System.out.println(i + " " + j + " " + tempH[0] + " " + tempH[1] + " " + tempH[2]);
+//				System.out.println(tempH[i].isEmpty());
 				tempH[j].add(tempH[i].pop());
 				Haoi tempH2 = new Haoi(numRings, numTowers, tempH);
 				if (tempH2.isLegal()) returnVal.add(tempH2);
+				System.out.println(i + " " + j + " " + tempH[0] + " " + tempH[1] + " " + tempH[2]);
 			}
 		}
 		
@@ -102,10 +104,9 @@ public class Haoi {
 		temp[0].add(2);
 		temp[0].add(1);
 		Haoi tempH = new Haoi(numRingsTemp, numTowersTemp, temp);
-//		Haoi tempH2 = new Haoi(numRingsTemp, numTowersTemp, temp);
-//		System.out.println(tempH.equals(tempH2));
 		HashSet<Haoi> tempHS = new HashSet<>();
 		tempHS.add(tempH);
+//		System.out.println(tempH.isSolved());
 		System.out.println(tempH.solve(0, tempHS, new ArrayList<Haoi>()));
 
 	}
